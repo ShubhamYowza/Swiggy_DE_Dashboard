@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Campaign Performance Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;650;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>try{var t=localStorage.getItem('cpd-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<style>
+:root{
+  --primary:#4680ff; --success:#2ca87f; --warning:#e58a00; --info:#13a8e8; --danger:#dc2626;
+  --bg:#f4f7fa; --panel:#ffffff; --panel2:#f8f9fb; --ink:#1d2630; --sub:#5b6b79; --faint:#8996a4;
+  --line:#e7eaee; --line2:#dbe0e5; --hover:#f3f6fb; --sub-row:#f8f9fb; --total:#eef2f8;
+  --side:#1d2630; --side2:#263240; --side-ink:#bfc6cf; --side-dim:#7d8a98; --side-line:#2e3a48;
+  --pos:#2ca87f; --neg:#dc2626;
+  --shadow:0 1px 2px rgba(27,46,94,.04),0 4px 14px rgba(27,46,94,.05);
+  --radius:10px;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#131920; --panel:#1b232d; --panel2:#202a35; --ink:#e3e8ee; --sub:#9aa6b3; --faint:#6f7c8a;
+  --line:#2a3440; --line2:#34404e; --hover:#232d39; --sub-row:#1f2833; --total:#25303d;
+  --side:#161d25; --side2:#1e2731; --side-ink:#b7c0ca; --side-dim:#6f7c8a; --side-line:#26303b;
+  --pos:#4cc79a; --neg:#f07171; --shadow:none; color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme]){
+    --bg:#131920; --panel:#1b232d; --panel2:#202a35; --ink:#e3e8ee; --sub:#9aa6b3; --faint:#6f7c8a;
+    --line:#2a3440; --line2:#34404e; --hover:#232d39; --sub-row:#1f2833; --total:#25303d;
+    --side:#161d25; --side2:#1e2731; --side-ink:#b7c0ca; --side-dim:#6f7c8a; --side-line:#26303b;
+    --pos:#4cc79a; --neg:#f07171; --shadow:none;
+  }
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:13.5px;line-height:1.45;-webkit-font-smoothing:antialiased}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+button{font:inherit}
+
+/* ---------- Shell ---------- */
+.shell{display:flex;min-height:100vh}
+.sidebar{width:252px;flex:none;background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:50;transition:margin-left .2s}
+.shell.collapsed .sidebar{margin-left:-252px}
+.brand{display:flex;align-items:center;gap:11px;padding:20px 20px;font-size:15.5px;white-space:nowrap;font-weight:650;color:#fff;letter-spacing:-.01em}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#4680ff,#6f9bff);display:grid;place-items:center;color:#fff;box-shadow:0 4px 12px rgba(70,128,255,.35)}
+.brand-mark svg.i{width:19px;height:19px;stroke-width:2.2}
+.nav-cap{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--side-dim);padding:18px 22px 8px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 22px;margin:1px 0;color:var(--side-ink);cursor:pointer;border-left:3px solid transparent;font-size:14px;user-select:none}
+.nav-item:hover{background:var(--side2);color:#fff}
+.nav-item.active{background:var(--side2);color:#fff;border-left-color:var(--primary);font-weight:600}
+.nav-item.active svg.i{color:var(--primary)}
+.side-upload{margin:6px 22px 0;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--primary);color:#fff;border:none;border-radius:8px;height:38px;cursor:pointer;font-weight:600;font-size:13.5px}
+.side-upload:hover{filter:brightness(1.08)}
+.side-hint{font-size:11.5px;color:var(--side-dim);padding:8px 22px 0;line-height:1.4}
+.side-foot{margin-top:auto;border-top:1px solid var(--side-line);padding:14px 18px;display:flex;align-items:center;gap:11px}
+.file-badge{width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;flex:none}
+.file-name{color:#fff;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+.file-sub{font-size:11.5px;color:var(--side-dim)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{height:64px;display:flex;align-items:center;gap:10px;padding:0 clamp(14px,2.4vw,30px);background:var(--bg);position:sticky;top:0;z-index:40;border-bottom:1px solid transparent}
+.icon-btn{width:38px;height:38px;border-radius:9px;border:none;background:transparent;color:var(--sub);display:grid;place-items:center;cursor:pointer}
+.icon-btn:hover{background:var(--hover);color:var(--ink)}
+.icon-btn svg.i{width:20px;height:20px}
+.top-spacer{flex:1}
+.top-upload{display:flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);color:var(--ink);cursor:pointer;font-weight:550}
+.top-upload:hover{border-color:var(--primary);color:var(--primary)}
+.content{padding:6px clamp(14px,2.4vw,30px) 40px;max-width:1720px;width:100%}
+.page-head{margin:4px 0 18px}
+.page-head h2{margin:0 0 4px;font-size:19px;font-weight:650;letter-spacing:-.01em}
+.crumbs{color:var(--sub);font-size:13px}
+.crumbs span{color:var(--faint);margin:0 6px}
+#fileInput{display:none}
+
+/* ---------- Cards ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)}
+.card-title{font-size:14.5px;font-weight:650;display:flex;align-items:center;gap:8px}
+.card-sub{font-size:12.5px;color:var(--sub)}
+
+/* ---------- Filters ---------- */
+.filters{margin-bottom:18px}
+.filter-grid{display:flex;flex-wrap:wrap;gap:12px 14px;align-items:flex-end;padding:14px 18px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field > label{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;font-weight:650}
+.dd{position:relative}
+.dd-btn{display:flex;align-items:center;gap:8px;justify-content:space-between;min-width:128px;max-width:220px;height:36px;padding:0 11px;border:1px solid var(--line2);background:var(--panel);color:var(--ink);border-radius:8px;cursor:pointer;font-size:13px;white-space:nowrap}
+.dd-btn span.t{overflow:hidden;text-overflow:ellipsis}
+.dd-btn:hover{border-color:var(--primary)}
+.dd-btn.filtered{border-color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,var(--panel));color:var(--primary);font-weight:600}
+.dd-btn svg.i{width:14px;height:14px;color:var(--faint)}
+.pop{display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:8px;z-index:60;min-width:250px;max-width:360px;max-height:min(70vh,520px);overflow-y:auto;box-shadow:0 14px 38px rgba(15,25,45,.18)}
+.pop.right{left:auto;right:0}
+.pop.open{display:block}
+.pop label{display:flex;gap:9px;align-items:center;font-size:13px;padding:6px 8px;border-radius:6px;cursor:pointer;color:var(--ink);text-transform:none;letter-spacing:normal;font-weight:400}
+.pop label:hover{background:var(--hover)}
+.pop label .lt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pop label .ls{font-size:11px;color:var(--faint);white-space:nowrap}
+.pop label.all{font-weight:650;border-bottom:1px solid var(--line);border-radius:6px 6px 0 0;margin-bottom:4px;padding-bottom:8px}
+.pop label.grp{font-weight:650;color:var(--primary);margin-top:6px;font-size:12.5px}
+.pop label.in{padding-left:28px}
+.pop .ms-search{width:100%;height:34px;border:1px solid var(--line2);border-radius:7px;padding:0 10px;margin-bottom:6px;background:var(--panel2);color:var(--ink);font:inherit;outline:none}
+.pop .ms-search:focus{border-color:var(--primary)}
+.pop-hint{font-size:11.5px;color:var(--sub);background:var(--hover);border-radius:6px;padding:7px 9px;margin:2px 0 6px;line-height:1.4}
+.pop-more{font-size:11.5px;color:var(--faint);padding:6px 8px}
+.pop .radio{width:15px;height:15px;border-radius:50%;border:2px solid var(--line2);flex:none}
+.pop .radio.on{border-color:var(--primary);background:radial-gradient(var(--primary) 45%,transparent 50%)}
+input[type=checkbox]{accent-color:var(--primary);width:15px;height:15px;margin:0;flex:none}
+input[type=date]{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line2);border-radius:8px;height:36px;padding:0 8px}
+.btn-ghost{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--panel);color:var(--ink);border-radius:7px;height:30px;padding:0 11px;font-size:12.5px;cursor:pointer}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+.btn-ghost svg.i{width:14px;height:14px}
+.fcount{font-size:11px;font-weight:700;background:var(--primary);color:#fff;border-radius:10px;padding:1px 7px}
+
+/* ---------- KPI cards ---------- */
+.kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-bottom:18px}
+.kpi{border-radius:var(--radius);padding:20px 22px;color:#fff;position:relative;overflow:hidden;min-height:128px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:'l s' 'v s' 'd d';align-items:start;column-gap:10px}
+.kpi .kpi-l{grid-area:l} .kpi .kpi-v{grid-area:v} .kpi .kpi-d{grid-area:d} .kpi .kpi-spark{grid-area:s;align-self:center}
+.kpi.blue{background:var(--primary)} .kpi.green{background:var(--success)} .kpi.orange{background:var(--warning)} .kpi.cyan{background:var(--info)}
+.kpi-l{font-size:14px;opacity:.95;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-l .src{opacity:.75;font-size:12px}
+.kpi-v{font-size:clamp(20px,1.8vw,27px);font-weight:500;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi-d{font-size:12px;opacity:.9;margin-top:6px;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.kpi-d svg.i{width:13px;height:13px}
+.kpi-spark{width:clamp(56px,5.5vw,96px);height:46px}
+.kpi-spark svg{width:100%;height:100%;overflow:visible}
+.stat-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}
+@media (min-width:1600px){.stat-strip{grid-template-columns:repeat(8,minmax(0,1fr))}}
+@media (max-width:700px){.stat-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{display:flex;align-items:center;gap:13px;padding:16px 20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0;min-width:0}
+.stat-ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none}
+.stat-ic svg.i{width:19px;height:19px}
+.stat-l{font-size:12.5px;color:var(--sub)}
+.stat-v{font-size:19px;font-weight:550;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.bg-blue{background:var(--primary)} .bg-green{background:var(--success)} .bg-orange{background:var(--warning)} .bg-cyan{background:var(--info)}
+
+/* ---------- Tables ---------- */
+.panel{display:none} .panel.active{display:block}
+.table-scroll{overflow:auto;max-height:calc(100vh - 140px);min-height:200px}
+.table-scroll > .empty{border:none;margin:0}
+table{width:100%;border-collapse:separate;border-spacing:0}
+thead th{position:sticky;top:0;z-index:3;background:var(--panel2);text-align:right;padding:10px 12px;font-size:11px;font-weight:650;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line2);white-space:nowrap;vertical-align:bottom}
+thead tr.r1 th{height:38px}
+thead tr.r2 th{top:38px;font-size:10.5px;padding:7px 12px}
+thead th.grp{text-align:center;border-left:1px solid var(--line2);color:var(--ink)}
+thead th.sorted,thead th.grp.sorted{color:var(--primary)}
+th:first-child,td:first-child{position:sticky;left:0;z-index:1;text-align:left;border-right:1px solid var(--line)}
+thead th:first-child{z-index:5}
+th.l,td.l{text-align:left}
+tbody td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;background:var(--panel)}
+tbody tr:hover td{background:var(--hover)}
+td.gs,th.gs{border-left:1px solid var(--line2)}
+td.neg{color:var(--neg)} td.pos{color:var(--pos)}
+tfoot td{position:sticky;bottom:0;z-index:2;background:var(--total);font-weight:700;padding:11px 12px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;border-top:2px solid var(--line2)}
+tfoot td:first-child{z-index:3}
+.muted{color:var(--faint);font-weight:500}
+.chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;color:#fff}
+.chip.google{background:var(--success)} .chip.meta{background:var(--primary)} .chip.other{background:#7a5af8}
+/* period headers (overview) */
+table.ov{width:max-content;min-width:min(100%,640px)}
+table.ov td.metric{width:230px}
+th.ph{min-width:128px;text-transform:none;letter-spacing:normal}
+.ph-y{font-size:10.5px;font-weight:700;color:var(--primary)}
+.ph-w{font-size:12.5px;font-weight:650;color:var(--ink)}
+.ph-d{font-size:11px;font-weight:450;color:var(--faint)}
+th.tot-col,td.tot-col{background:var(--total);font-weight:650;border-left:2px solid var(--line2)}
+thead th.tot-col{color:var(--ink)}
+tr.sec-row td{background:var(--panel2);font-weight:650;font-size:12.5px;padding:9px 12px;border-bottom:1px solid var(--line2);text-align:left}
+tr.sec-row:hover td{background:var(--panel2)}
+td.metric{font-weight:550;color:var(--ink);min-width:170px}
+td.metric .mk{font-size:10.5px;color:var(--faint);font-weight:500;margin-left:6px}
+/* campaign view */
+.camp-row{cursor:pointer}
+.camp-row td{font-weight:550}
+.cname-wrap{display:flex;align-items:center;gap:8px;min-width:250px;max-width:420px}
+.caret{display:inline-block;transition:transform .15s;color:var(--sub);font-size:10px;width:10px}
+.caret.open{transform:rotate(90deg);color:var(--primary)}
+.rank{font-size:11px;color:var(--faint);min-width:18px;font-variant-numeric:tabular-nums}
+.cname{overflow:hidden;text-overflow:ellipsis}
+.agc{font-size:11px;color:var(--faint);font-weight:500;margin-left:auto;padding-left:8px}
+.share{height:3px;background:var(--line);border-radius:3px;margin:5px 0 0 36px;max-width:384px;overflow:hidden}
+.share span{display:block;height:100%;background:var(--primary);border-radius:3px}
+.ag-row td{background:var(--sub-row);color:var(--sub);font-size:13px}
+.ag-row td:first-child{padding-left:48px}
+.more-row td{text-align:center!important;background:var(--panel2)}
+.scope{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.toggle{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--sub);cursor:pointer;user-select:none}
+.note{font-size:12px;color:var(--warning);padding:8px 18px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--warning) 7%,var(--panel))}
+.empty{padding:70px 20px;text-align:center;color:var(--sub)}
+.empty h3{margin:10px 0 6px;color:var(--ink);font-size:16px}
+.empty .big-ic{width:56px;height:56px;border-radius:50%;background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary);display:inline-grid;place-items:center}
+.empty .big-ic svg.i{width:26px;height:26px}
+.empty .side-upload{display:inline-flex;margin-top:14px;padding:0 18px}
+
+/* compare */
+.compare-banner{padding:14px 18px;margin-bottom:18px}
+.compare-head{font-size:12.5px;color:var(--sub);margin-bottom:10px;font-weight:650}
+.compare-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
+.cc-label{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-weight:650}
+.cc-val{font-size:17px;font-weight:650;font-variant-numeric:tabular-nums}
+.cc-delta{font-size:12px;margin-top:2px;font-variant-numeric:tabular-nums}
+.cc-delta.up{color:var(--pos)} .cc-delta.down{color:var(--neg)}
+.cc-prev{color:var(--faint)}
+
+/* loader */
+#loader{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(15,20,30,.4);backdrop-filter:blur(2px)}
+#loader.show{display:flex}
+.load-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 26px;width:min(380px,90vw);box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.load-title{font-weight:650;margin-bottom:4px}
+.load-sub{font-size:12.5px;color:var(--sub);margin-bottom:12px;font-variant-numeric:tabular-nums}
+.load-track{height:6px;background:var(--line);border-radius:6px;overflow:hidden}
+.load-fill{height:100%;width:0;background:var(--primary);transition:width .15s}
+
+@media (max-width:1100px){ .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:900px){
+  .sidebar{position:fixed;left:0;top:0;margin-left:-252px}
+  .shell.mobile-open .sidebar{margin-left:0;box-shadow:0 0 40px rgba(0,0,0,.4)}
+  .shell.collapsed .sidebar{margin-left:-252px}
+}
+@media (max-width:560px){ .kpi-row{grid-template-columns:1fr} .kpi-v{font-size:23px} }
+
+</style>
+</head>
+<body>
+<div id="loader"><div class="load-card"><div class="load-title" id="loadTitle">Reading file…</div><div class="load-sub" id="loadSub"></div><div class="load-track"><div class="load-fill" id="loadFill"></div></div></div></div>
+<input type="file" id="fileInput" accept=".csv">
+<div class="shell" id="shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark"><span data-icon="bars"></span></span>Campaign Dashboard</div>
+    <div class="nav-cap">Navigation</div>
+    <div class="nav-item tab active" data-tab="overview"><span data-icon="grid"></span>Overview</div>
+    <div class="nav-item tab" data-tab="campaign"><span data-icon="layers"></span>Campaign view</div>
+    <div class="nav-cap">Data</div>
+    <button class="side-upload" id="uploadBtn"><span data-icon="upload"></span>Upload CSV</button>
+    <div class="side-hint">Large files are read in chunks, so the page stays responsive.</div>
+    <div class="side-foot">
+      <div class="file-badge"><span data-icon="file"></span></div>
+      <div style="min-width:0"><div class="file-name" id="fileName">No file loaded</div><div class="file-sub" id="fileSub">Upload a CSV to begin</div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="icon-btn" id="menuBtn" title="Toggle sidebar"><span data-icon="menu"></span></button>
+      <div class="top-spacer"></div>
+      <button class="top-upload" id="uploadBtn2"><span data-icon="upload"></span>Upload CSV</button>
+      <button class="icon-btn" id="themeBtn" title="Switch theme"></button>
+    </div>
+
+    <div class="content">
+      <div class="page-head">
+        <h2 id="pageTitle">Overview</h2>
+        <div class="crumbs">Home<span>/</span>Dashboard<span>/</span><b id="crumbLast" style="font-weight:500">Overview</b></div>
+      </div>
+
+      <div class="card filters" id="filterCard">
+        <div class="card-head">
+          <div class="card-title"><span data-icon="filter"></span>Filters <span class="fcount" id="fcount" style="display:none"></span></div>
+          <button class="btn-ghost" id="resetBtn"><span data-icon="reset"></span>Reset filters</button>
+        </div>
+        <div class="filter-grid">
+          <div class="field"><label>Funnel source</label><div class="dd"><button class="dd-btn" id="sourceBtn"></button><div class="pop" id="sourcePop"></div></div></div>
+          <div class="field" id="granField"><label>Overview split</label><div class="dd"><button class="dd-btn" id="granBtn"></button><div class="pop" id="granPop"></div></div></div>
+          <div class="field"><label>Channel</label><div class="dd"><button class="dd-btn" id="channelBtn"></button><div class="pop" id="channelPop"></div></div></div>
+          <div class="field"><label>Campaign</label><div class="dd"><button class="dd-btn" id="campaignBtn"></button><div class="pop" id="campaignPop"></div></div></div>
+          <div class="field"><label>Ad group</label><div class="dd"><button class="dd-btn" id="adgroupBtn"></button><div class="pop" id="adgroupPop"></div></div></div>
+          <div class="field"><label>Year</label><div class="dd"><button class="dd-btn" id="yearBtn"></button><div class="pop" id="yearPop"></div></div></div>
+          <div class="field"><label>Week #</label><div class="dd"><button class="dd-btn" id="weekBtn"></button><div class="pop" id="weekPop"></div></div></div>
+          <div class="field"><label>Day of week</label><div class="dd"><button class="dd-btn" id="dayBtn"></button><div class="pop" id="dayPop"></div></div></div>
+          <div class="field"><label>Date range</label>
+            <div style="display:flex;gap:6px;align-items:center"><input type="date" id="dateFrom"><span style="color:var(--sub);font-size:12px">to</span><input type="date" id="dateTo"></div>
+          </div>
+          <div class="field"><label>Compare to</label><div class="dd"><button class="dd-btn" id="compareBtn"></button><div class="pop right" id="comparePop"></div></div></div>
+          <div class="field"><label>Columns</label><div class="dd"><button class="dd-btn" id="metricsBtn"></button><div class="pop right" id="metricsPop"></div></div></div>
+        </div>
+      </div>
+
+      <div id="kpiArea" style="display:none">
+        <div class="kpi-row" id="kpis"></div>
+        <div class="card stat-strip" id="stats"></div>
+      </div>
+      <div class="card compare-banner" id="compareBanner" style="display:none"></div>
+
+      <div class="panel active" id="panel-overview">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title"><span>Performance by <span id="ovGran">week</span></span></div><div class="card-sub" id="ovSub">Metrics in rows, periods side by side</div></div></div>
+          <div class="table-scroll" id="overviewTable"></div>
+        </div>
+      </div>
+      <div class="panel" id="panel-campaign">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">Campaigns</div><div class="card-sub" id="campSub"></div></div><div class="scope" id="campScope"></div></div>
+          <div id="campNote"></div>
+          <div class="table-scroll" id="campaignTable"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const BASE = [{k:'Spend',l:'Spend',fmt:'money'},{k:'Impr',l:'Impr.',fmt:'int'},{k:'Clicks',l:'Clicks',fmt:'int'},{k:'Installs',l:'Installs',fmt:'int'}];
+const SRC_MAP = {
+  Frontend:[{gk:'Lead',csv:'F_CC'},{gk:'OB',csv:'F_OB'},{gk:'Payment',csv:'F_pay'},{gk:'FOD',csv:'F_FOD'},{gk:'AppActivation',csv:'FE App Activation',l:'App Activation'},{gk:'PurchaseFL',csv:'FE Purchase',l:'Purchase (First Login)'}],
+  Backend:[{gk:'Lead',csv:'B_Leads'},{gk:'OB',csv:'B_OB'},{gk:'Payment',csv:'B_Payment'},{gk:'FOD',csv:'B_FOD'},{gk:'Spillover',csv:'Spillover FOD'}],
+  AppsFlyer:[{gk:'Lead',csv:'AF Leads'},{gk:'OB',csv:'AF OB'},{gk:'Payment',csv:'AF Paid'},{gk:'FOD',csv:'AF FOD'}]
+};
+const CALC = [
+  {k:'CPI',l:'CPI',fn:r=>div(r.Spend,r.Installs),fmt:'money2'},
+  {k:'CPL',l:'CPL',fn:r=>div(r.Spend,r.Lead),fmt:'money'},
+  {k:'CPOB',l:'CPOB',fn:r=>div(r.Spend,r.OB),fmt:'money'},
+  {k:'CPFOD',l:'CPFOD',fn:r=>div(r.Spend,r.FOD),fmt:'money'},
+  {k:'InstallRate',l:'Install Rate',fn:r=>div(r.Installs,r.Clicks),fmt:'pct'},
+  {k:'ClicksToCC',l:'Clicks \u2192 Lead',fn:r=>div(r.Lead,r.Clicks),fmt:'pct'},
+  {k:'CCToOB',l:'Lead \u2192 OB',fn:r=>div(r.OB,r.Lead),fmt:'pct'},
+  {k:'OBToFOD',l:'OB \u2192 FOD',fn:r=>div(r.FOD,r.OB),fmt:'pct'},
+  {k:'CPC',l:'CPC',fn:r=>div(r.Spend,r.Clicks),fmt:'money2'},
+  {k:'CPM',l:'CPM',fn:r=>{const v=div(r.Spend,r.Impr);return v==null?null:v*1000;},fmt:'money2'},
+  {k:'CTR',l:'CTR',fn:r=>div(r.Clicks,r.Impr),fmt:'pct2'},
+  {k:'InstallToLead',l:'Install to Lead (%)',fn:r=>div(r.Lead,r.Installs),fmt:'pct'},
+  {k:'LeadToPayment',l:'Lead to Payment (%)',fn:r=>divz(r.Payment,r.Lead),fmt:'pct'},
+  {k:'PaymentToOB',l:'Payment to OB (%)',fn:r=>divz(r.OB,r.Payment),fmt:'pct'},
+  {k:'LeadDrop',l:'Lead Drop',fn:r=>drop(r.Lead,r.F_Lead),fmt:'spct'},
+  {k:'OBDrop',l:'OB Drop',fn:r=>drop(r.OB,r.F_OB_base),fmt:'spct'},
+  {k:'FODDrop',l:'FOD Drop',fn:r=>drop(r.FOD,r.F_FOD_base),fmt:'spct'},
+  {k:'PaymentDrop',l:'Payment Drop',fn:r=>{const v=drop(r.Payment,r.F_Payment);return v==null?0:v;},fmt:'spct'}
+];
+// Metrics that should read 0 rather than a dash when payment data is missing
+const ZERO_IF_MISSING = new Set(['Payment','LeadToPayment','PaymentToOB','PaymentDrop']);
+function div(a,b){ if(!b) return null; return (a||0)/b; }
+function divz(a,b){ if(!b) return 0; return (a||0)/b; }
+// (selected source - Frontend) / Frontend. Frontend is always the baseline.
+function drop(sel,front){ if(!front) return null; return ((sel||0)-front)/front; }
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const NF0=new Intl.NumberFormat('en-IN',{maximumFractionDigits:0});
+const NF2=new Intl.NumberFormat('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+function fmt(v,type){
+  if(v===null||v===undefined||isNaN(v)) return '\u2014';
+  if(type==='money') return '\u20b9'+NF0.format(v);
+  if(type==='money2') return '\u20b9'+NF2.format(v);
+  if(type==='pct') return (v*100).toFixed(1)+'%';
+  if(type==='pct2') return (v*100).toFixed(2)+'%';
+  if(type==='spct') return (v>0?'+':'')+(v*100).toFixed(1)+'%';
+  return NF0.format(Math.round(v));
+}
+let RAW = [];
+let HAS_ADGROUP = true;
+let FILE_NAME = '';
+let SRC_ROWS = 0;
+let ALL_CHANNELS = [], ALL_WEEKS = [], ALL_YEARS = [], ALL_CAMPAIGNS = [], CAMP_BY_NAME = new Map(), WEEK_LABELS = {}, WEEK_SHORT = {}, WEEK_YEAR = {}, WEEK_NAME = {}, WEEK_RANGE = {}, MIN_DK = null, MAX_DK = null;
+let expanded = new Set();
+let showAllCamps = false;
+const CAMP_LIMIT = 200;
+let selectedMetrics = new Set(['Spend','Clicks','Installs','Lead','OB','FOD','CPL','CPOB']);
+let state = { source:'Frontend', gran:'week', channels:new Set(), years:new Set(), weeks:new Set(), days:new Set([0,1,2,3,4,5,6]), campaigns:new Set(), adgroups:new Set(), splitWeeks:true, dateFrom:null, dateTo:null, compare:'none', compareFrom:null, compareTo:null };
+function stripTime(d){ return d? new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime() : null; }
+function toInputDate(d){ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+
+function num(v){
+  if(v===null||v===undefined||v==='') return 0;
+  const n=+v; if(n===n) return n;                       // fast path for plain numbers
+  const m=parseFloat(String(v).replace(/[^0-9.\-]/g,'')); return isNaN(m)?0:m;
+}
+function parseDate(s){
+  if(!s) return null;
+  s=String(s).trim();
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return new Date(+m[1],+m[2]-1,+m[3]);
+  m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if(m){ let[,a,b,y]=m; if(y.length===2) y='20'+y; const d=new Date(+y,+b-1,+a); if(!isNaN(d)) return d; }
+  const d=new Date(s);
+  return isNaN(d)?null:new Date(d.getFullYear(),d.getMonth(),d.getDate());
+}
+function weekStart(d){ const dt=new Date(d); const day=(dt.getDay()+6)%7; dt.setDate(dt.getDate()-day); dt.setHours(0,0,0,0); return dt; }
+const _fmtShort={month:'short',day:'numeric'};
+function rangeLabel(a,b){
+  const A=new Date(a),B=new Date(b);
+  if(A.getFullYear()!==B.getFullYear()){ const o={month:'short',day:'numeric',year:'numeric'}; return A.toLocaleDateString('en-IN',o)+' \u2013 '+B.toLocaleDateString('en-IN',o); }
+  return A.toLocaleDateString('en-IN',_fmtShort)+' \u2013 '+B.toLocaleDateString('en-IN',_fmtShort);
+}
+function weekLabel(d){ const s=weekStart(d); const e=new Date(s); e.setDate(e.getDate()+6); return rangeLabel(s,e); }
+function dayLabel(d){ return new Date(d).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'}); }
+
+// ISO week (Monday start). The year is the year of that week's Thursday,
+// so 29 Dec 2025 - 4 Jan 2026 is 2026 Week 1, never split across years.
+const DAY=86400000;
+function isoWeek(dk){
+  const d=new Date(dk), dow=(d.getDay()+6)%7;
+  const thu=new Date(d.getFullYear(),d.getMonth(),d.getDate()-dow+3);
+  const y=thu.getFullYear();
+  const wk=Math.floor(Math.round((Date.UTC(y,thu.getMonth(),thu.getDate())-Date.UTC(y,0,1))/DAY)/7)+1;
+  const mon=new Date(d.getFullYear(),d.getMonth(),d.getDate()-dow).getTime();
+  return {y,wk,mon};
+}
+// Year a row's Week-column value belongs to. Handles weeks that cross New Year:
+// a December date tagged week 1-2 belongs to next year; a January date tagged 50+ to last year.
+function weekYear(dk,weekRaw){
+  if(dk==null) return 'Unknown';
+  const d=new Date(dk), y=d.getFullYear(), m=d.getMonth(), w=parseFloat(String(weekRaw).replace(/[^0-9.]/g,''));
+  if(!isNaN(w)){ if(m===11 && w<=2) return y+1; if(m===0 && w>=50) return y-1; }
+  return y;
+}
+function assignWeekNumbers(){
+  WEEK_LABELS={}; WEEK_SHORT={}; WEEK_YEAR={}; WEEK_NAME={}; WEEK_RANGE={};
+  const hasRaw = RAW.some(r=>r.weekRaw);
+  const info=new Map();          // "year|week" -> {year, w, min, max}
+  const isoCache=new Map();
+  const iso=dk=>{ let v=isoCache.get(dk); if(!v){ v=isoWeek(dk); isoCache.set(dk,v); } return v; };
+  for(const r of RAW){
+    let year,w;
+    if(hasRaw){ if(!r.weekRaw){ r._wk=null; continue; } year=weekYear(r.dk,r.weekRaw); w=r.weekRaw; }
+    else { if(r.dk==null){ r._wk=null; continue; } const v=iso(r.dk); year=v.y; w=String(v.wk); }
+    const key=year+'|'+w; r._wk=key;
+    let inf=info.get(key);
+    if(!inf){ inf={year,w,min:Infinity,max:-Infinity}; info.set(key,inf); }
+    if(r.dk!=null){
+      const lo = hasRaw ? r.dk : iso(r.dk).mon, hi = hasRaw ? r.dk : iso(r.dk).mon+6*DAY+3600000;
+      if(lo<inf.min) inf.min=lo; if(hi>inf.max) inf.max=hi;
+    }
+  }
+  const yNum=y=>y==='Unknown'?Infinity:y;
+  const wNum=w=>{ const n=parseFloat(String(w).replace(/[^0-9.]/g,'')); return isNaN(n)?Infinity:n; };
+  const keys=[...info.keys()].sort((a,b)=>{ const A=info.get(a),B=info.get(b);
+    return (yNum(A.year)-yNum(B.year)) || (wNum(A.w)-wNum(B.w)) || (A.min-B.min); });
+  const map={};
+  keys.forEach((k,i)=>{
+    const n=i+1, inf=info.get(k); map[k]=n;
+    const base=(/week/i.test(inf.w)?inf.w:`Week ${inf.w}`)+(inf.min!==Infinity?` \u00b7 ${rangeLabel(inf.min,inf.max)}`:'');
+    WEEK_SHORT[n]=base; WEEK_YEAR[n]=inf.year;
+    WEEK_NAME[n]=/week/i.test(inf.w)?inf.w:`Week ${inf.w}`; WEEK_RANGE[n]=inf.min!==Infinity?rangeLabel(inf.min,inf.max):'';
+    WEEK_LABELS[n]=`${inf.year} \u00b7 ${base}`;
+  });
+  for(const r of RAW){
+    r.weekNum = r._wk ? map[r._wk] : null; delete r._wk;
+    r.week = r.weekNum ? WEEK_LABELS[r.weekNum] : 'Unknown';
+    r.year = r.weekNum ? WEEK_YEAR[r.weekNum] : (r.dk!=null ? new Date(r.dk).getFullYear() : 'Unknown');
+  }
+}
+
+const NUM_FIELDS=['Spend','Impr','Clicks','Installs','F_CC','F_OB','F_pay','F_FOD','B_FOD','B_Leads','B_OB','B_Payment','Spillover FOD','AF FOD','AF Leads','AF OB','AF Paid','FE App Activation','FE Purchase'];
+const FIELD_KEYS={
+  date:['date','day','reportingstarts'], week:['week','weeknum','weekno','weeknumber'],
+  channel:['channel','platform'], campaign:['campaign','campaignname'],
+  adgroup:['adgroup','adgroupname','adgroups','adset','adsetname','adsets'],
+  Spend:['spend','cost','amountspent','amountspentinr'], Impr:['impr','impressions','impression'],
+  Clicks:['clicks','click'], Installs:['installs','install'],
+  F_CC:['fcc','flead','fleads'], F_OB:['fob'], F_pay:['fpay','fpayment','fpaid'], F_FOD:['ffod'],
+  B_FOD:['bfod'], B_Leads:['bleads','blead'], B_OB:['bob'], B_Payment:['bpayment','bpay','bpaid'],
+  'Spillover FOD':['spilloverfod'],
+  'AF FOD':['affod'], 'AF Leads':['afleads','aflead'], 'AF OB':['afob'], 'AF Paid':['afpaid','afpayment','afpay'],
+  'FE App Activation':['feappactivation','fappactivation','frontendappactivation','appactivation'],
+  'FE Purchase':['fepurchasefirstlogin','fpurchasefirstlogin','frontendpurchasefirstlogin','fepurchase','purchasefirstlogin']
+};
+
+function showLoader(title,sub,frac){
+  document.getElementById('loader').classList.add('show');
+  document.getElementById('loadTitle').textContent=title;
+  document.getElementById('loadSub').textContent=sub||'';
+  document.getElementById('loadFill').style.width=Math.round((frac||0)*100)+'%';
+}
+function hideLoader(){ document.getElementById('loader').classList.remove('show'); }
+
+document.getElementById('uploadBtn').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('fileInput').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f) return;
+  e.target.value='';                           // allow re-uploading the same file
+  FILE_NAME = f.name||'';
+  const sizeMB=(f.size/1048576).toFixed(1);
+  showLoader('Reading '+FILE_NAME, `0 of ${sizeMB} MB`, 0);
+
+  // Stream the file in chunks. Rows with the same date, week, channel, campaign and
+  // ad group are merged as they arrive, so memory and later work stay small.
+  let idx=null, rowCount=0;
+  const groups=new Map(), dateCache=new Map();
+  const dayOf=v=>{ let d=dateCache.get(v); if(d===undefined){ const pd=parseDate(v); d=pd?pd.getTime():null; dateCache.set(v,d); } return d; };
+  Papa.LocalChunkSize = 2*1024*1024;
+  Papa.parse(f,{
+    header:false, skipEmptyLines:true,
+    chunk:(res)=>{
+      let rows=res.data, start=0;
+      if(!idx){
+        const header=rows[0]||[]; start=1;
+        const norm=h=>String(h).toLowerCase().replace(/[^a-z0-9]/g,'');
+        const hmap={}; header.forEach((h,i)=>{ const n=norm(h); if(!(n in hmap)) hmap[n]=i; });
+        idx={}; Object.entries(FIELD_KEYS).forEach(([k,c])=>{ const hit=c.find(x=>x in hmap); idx[k]=hit===undefined?-1:hmap[hit]; });
+        HAS_ADGROUP = idx.adgroup>=0;
+      }
+      const gi=k=>idx[k];
+      const iDate=gi('date'),iWeek=gi('week'),iCh=gi('channel'),iCamp=gi('campaign'),iAg=gi('adgroup');
+      const numIdx=NUM_FIELDS.map(k=>idx[k]);
+      for(let r=start;r<rows.length;r++){
+        const row=rows[r];
+        const dk = iDate>=0 ? dayOf(row[iDate]) : null;
+        const weekRaw = iWeek>=0 ? String(row[iWeek]??'').trim() : '';
+        const channel = (iCh>=0 ? String(row[iCh]??'').trim() : '') || 'Unknown';
+        const campaign = (iCamp>=0 ? String(row[iCamp]??'').trim() : '') || 'Unassigned';
+        const adgroup = (iAg>=0 ? String(row[iAg]??'').trim() : '') || 'Unassigned';
+        const key = dk+'\u0001'+weekRaw+'\u0001'+channel+'\u0001'+campaign+'\u0001'+adgroup;
+        let g=groups.get(key);
+        if(!g){
+          g={dk,weekRaw,channel,campaign,adgroup,ck:campaign+'|||'+channel,agk:campaign+'\u0001'+adgroup};
+          for(const k of NUM_FIELDS) g[k]=0;
+          groups.set(key,g);
+        }
+        for(let n=0;n<NUM_FIELDS.length;n++){ const ix=numIdx[n]; if(ix>=0) g[NUM_FIELDS[n]]+=num(row[ix]); }
+        rowCount++;
+      }
+      const done=Math.min(1,(res.meta.cursor||0)/f.size);
+      showLoader('Reading '+FILE_NAME, `${(done*f.size/1048576).toFixed(1)} of ${sizeMB} MB \u00b7 ${rowCount.toLocaleString('en-IN')} rows`, done);
+    },
+    complete:()=>{
+      showLoader('Building dashboard\u2026', `${rowCount.toLocaleString('en-IN')} rows`, 1);
+      setTimeout(()=>{
+        const dateObjs=new Map();
+        RAW=[...groups.values()];
+        MIN_DK=null; MAX_DK=null;
+        for(const r of RAW){
+          if(r.dk!=null){
+            let d=dateObjs.get(r.dk); if(!d){ const dt=new Date(r.dk); d={date:dt,day:dayLabel(r.dk),dow:(dt.getDay()+6)%7}; dateObjs.set(r.dk,d); }
+            r.date=d.date; r.day=d.day; r.dow=d.dow;
+            if(MIN_DK===null||r.dk<MIN_DK) MIN_DK=r.dk; if(MAX_DK===null||r.dk>MAX_DK) MAX_DK=r.dk;
+          } else { r.date=null; r.day='Unknown'; r.dow=null; }
+        }
+        SRC_ROWS=rowCount;
+        assignWeekNumbers();
+        ALL_CHANNELS=[...new Set(RAW.map(r=>r.channel))];
+        ALL_WEEKS=[...new Set(RAW.map(r=>r.weekNum))].filter(n=>n!=null).sort((a,b)=>a-b);
+        state.channels=new Set(ALL_CHANNELS);
+        ALL_YEARS=[...new Set(RAW.map(r=>r.year))].sort((a,b)=>(a==='Unknown')-(b==='Unknown')||a-b);
+        state.years=new Set(ALL_YEARS);
+        state.weeks=new Set(ALL_WEEKS);
+        buildCampaignIndex();
+        resetFilters(false);
+        expanded.clear(); showAllCamps=false;
+        onDataLoaded();
+        hideLoader();
+      },30);
+    },
+    error:err=>{ hideLoader(); alert('Could not read the file: '+(err&&err.message||err)); }
+  });
+});
+
+function activeSrcFields(){ return SRC_MAP[state.source]; }
+const GEN_KEYS=['Lead','OB','Payment','FOD','Spillover'];
+let _addFor=null, _addFn=null;
+function compiledAdd(){
+  if(_addFor===state.source) return _addFn;
+  const src=activeSrcFields();
+  let body='a.Spend+=r.Spend;a.Impr+=r.Impr;a.Clicks+=r.Clicks;a.Installs+=r.Installs;'
+    +'a.F_Lead+=r.F_CC;a.F_OB_base+=r.F_OB;a.F_FOD_base+=r.F_FOD;a.F_Payment+=r.F_pay;';
+  for(const f of src) body+=`a[${JSON.stringify(f.gk)}]+=r[${JSON.stringify(f.csv)}];`;
+  _addFn=new Function('a','r',body+'return a;'); _addFor=state.source;
+  return _addFn;
+}
+function newAgg(){
+  return {Spend:0,Impr:0,Clicks:0,Installs:0,F_Lead:0,F_OB_base:0,F_FOD_base:0,F_Payment:0,Lead:0,OB:0,Payment:0,FOD:0,Spillover:0,AppActivation:0,PurchaseFL:0};
+}
+function addRow(a,r){ return compiledAdd()(a,r); }
+function aggRows(rows){ const a=newAgg(), add=compiledAdd(); for(let i=0;i<rows.length;i++) add(a,rows[i]); return a; }
+function sumInto(acc,row){ if(!('F_Lead' in acc)) Object.assign(acc,newAgg()); return addRow(acc,row); }
+
+
+
+/* =================== Icons =================== */
+const ICON_PATHS={
+  menu:'<path d="M4 6h16M4 12h16M4 18h11"/>',
+  grid:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
+  layers:'<path d="M12 3 2.5 8 12 13l9.5-5z"/><path d="m2.5 12 9.5 5 9.5-5"/><path d="m2.5 16 9.5 5 9.5-5"/>',
+  upload:'<path d="M12 15V4"/><path d="m7 9 5-5 5 5"/><path d="M4 20h16"/>',
+  file:'<path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5"/>',
+  moon:'<path d="M20.5 13.4A8.5 8.5 0 1 1 10.6 3.5a6.6 6.6 0 0 0 9.9 9.9z"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  filter:'<path d="M3.5 5h17l-6.5 7.5V19l-4 2v-8.5z"/>',
+  reset:'<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5"/>',
+  chev:'<path d="m6 9 6 6 6-6"/>',
+  bars:'<path d="M5 20V11M12 20V4M19 20v-6"/>',
+  eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  pointer:'<path d="m5 3 6 17 2.4-7.1L20.5 10.5z"/>',
+  check:'<path d="m4 12.5 5 5L20 6.5"/>',
+  card:'<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/>',
+  coin:'<circle cx="12" cy="12" r="9"/><path d="M9 8h6M9 11h6M13 8c2 0 2 6-4 6l5 3"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  up:'<path d="M12 19V5M6 11l6-6 6 6"/>',
+  down:'<path d="M12 5v14M6 13l6 6 6-6"/>'
+};
+function icon(n){ return `<svg class="i" viewBox="0 0 24 24">${ICON_PATHS[n]||''}</svg>`; }
+document.querySelectorAll('[data-icon]').forEach(el=>el.outerHTML=icon(el.dataset.icon));
+
+/* =================== Theme =================== */
+function currentTheme(){ return document.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); }
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  try{ localStorage.setItem('cpd-theme',t); }catch(e){}
+  const b=document.getElementById('themeBtn');
+  b.innerHTML=icon(t==='dark'?'sun':'moon');
+  b.title=t==='dark'?'Switch to light mode':'Switch to dark mode';
+}
+(function(){ let t=null; try{ t=localStorage.getItem('cpd-theme'); }catch(e){} applyTheme(t||currentTheme()); })();
+document.getElementById('themeBtn').onclick=()=>applyTheme(currentTheme()==='dark'?'light':'dark');
+
+/* =================== Shell =================== */
+document.getElementById('uploadBtn2').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('menuBtn').onclick=()=>{
+  const sh=document.getElementById('shell');
+  if(matchMedia('(max-width:900px)').matches) sh.classList.toggle('mobile-open'); else sh.classList.toggle('collapsed');
+};
+document.querySelectorAll('.nav-item.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.nav-item.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+  const name=t.dataset.tab==='overview'?'Overview':'Campaign view';
+  document.getElementById('pageTitle').textContent=name;
+  document.getElementById('crumbLast').textContent=name;
+  document.getElementById('granField').style.display=t.dataset.tab==='overview'?'flex':'none';
+  document.getElementById('shell').classList.remove('mobile-open');
+  render();
+});
+
+/* =================== Metric definitions =================== */
+function activeColumns(){
+  const cols=[];
+  BASE.forEach(m=>{ if(selectedMetrics.has(m.k)) cols.push({k:m.k,l:m.l,fmt:m.fmt}); });
+  activeSrcFields().forEach(f=>{ if(selectedMetrics.has(f.gk)) cols.push({k:f.gk,l:f.l||f.gk,fmt:'int'}); });
+  CALC.forEach(m=>{ if(selectedMetrics.has(m.k)) cols.push({k:m.k,l:m.l,fmt:m.fmt,calc:m.fn}); });
+  return cols;
+}
+function colValue(agg,c){
+  if(/Drop$/.test(c.k) && state.source==='Frontend') return null;
+  let v = c.calc ? c.calc(agg) : (agg[c.k] ?? 0);
+  if((v===null||v===undefined||isNaN(v)) && ZERO_IF_MISSING.has(c.k)) v=0;
+  return v;
+}
+function cellHtml(agg,c,cls){
+  const v=colValue(agg,c);
+  const k = c.fmt==='spct' && v ? (v<0?' neg':' pos') : '';
+  return `<td class="${(cls||'')+k}">${fmt(v,c.fmt)}</td>`;
+}
+function cellsHtml(agg,cols){ return cols.map(c=>cellHtml(agg,c)).join(''); }
+function chipHtml(ch){
+  const c=ch.toLowerCase();
+  const cls=c.includes('google')?'google':(c.includes('meta')||c.includes('facebook')||c.includes('fb'))?'meta':'other';
+  return `<span class="chip ${cls}">${esc(ch)}</span>`;
+}
+function metricGroups(){
+  return [
+    {title:'Volume',items:BASE.map(m=>({v:m.k,l:m.l}))},
+    {title:state.source+' funnel',items:activeSrcFields().map(f=>({v:f.gk,l:f.l||f.gk}))},
+    {title:'Cost & efficiency',items:CALC.filter(m=>['CPI','CPL','CPOB','CPFOD','CPC','CPM','CTR'].includes(m.k)).map(m=>({v:m.k,l:m.l}))},
+    {title:'Funnel conversion',items:CALC.filter(m=>['InstallRate','ClicksToCC','CCToOB','OBToFOD','InstallToLead','LeadToPayment','PaymentToOB'].includes(m.k)).map(m=>({v:m.k,l:m.l}))},
+    {title:'Drop vs Frontend',items:CALC.filter(m=>/Drop$/.test(m.k)).map(m=>({v:m.k,l:m.l}))}
+  ];
+}
+
+/* =================== Campaign / ad group index =================== */
+function buildCampaignIndex(){
+  const m=new Map();
+  for(const r of RAW){
+    let c=m.get(r.campaign);
+    if(!c){ c={name:r.campaign,channels:new Set(),spend:0,agm:new Map()}; m.set(r.campaign,c); }
+    c.channels.add(r.channel); c.spend+=r.Spend;
+    let a=c.agm.get(r.agk); if(!a){ a={v:r.agk,name:r.adgroup,spend:0,channels:new Set()}; c.agm.set(r.agk,a); } a.spend+=r.Spend; a.channels.add(r.channel);
+  }
+  ALL_CAMPAIGNS=[...m.values()].sort((a,b)=>b.spend-a.spend);
+  ALL_CAMPAIGNS.forEach(c=>{ c.ags=[...c.agm.values()].sort((a,b)=>b.spend-a.spend); delete c.agm; });
+  CAMP_BY_NAME=new Map(ALL_CAMPAIGNS.map(c=>[c.name,c]));
+}
+const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+function weeksOfYear(y){ return ALL_WEEKS.filter(n=>WEEK_YEAR[n]===y); }
+function visibleWeeks(){ return ALL_WEEKS.filter(n=>state.years.has(WEEK_YEAR[n])); }
+const inChannels=set=>{ for(const ch of set) if(state.channels.has(ch)) return true; return false; };
+// Ad groups of a campaign that have data in the selected channel(s)
+function visibleAdgroups(c){ return c.ags.filter(a=>inChannels(a.channels)); }
+function visibleCampaigns(){ return ALL_CAMPAIGNS.filter(c=>inChannels(c.channels)); }
+
+/* =================== Dropdown framework =================== */
+document.addEventListener('click',e=>{ if(!e.target.closest('.dd')) closeAllPops(); });
+function closeAllPops(){ document.querySelectorAll('.pop.open').forEach(p=>p.classList.remove('open')); }
+function setChecked(box,sel,total){ box.checked=total>0&&sel===total; box.indeterminate=sel>0&&sel<total; }
+let _rt=null;
+function scheduleRender(){ clearTimeout(_rt); _rt=setTimeout(render,90); }
+const DD={};
+function setBtn(id,text,filtered){
+  const b=document.getElementById(id+'Btn');
+  b.innerHTML=`<span class="t">${esc(text)}</span>${icon('chev')}`;
+  b.classList.toggle('filtered',!!filtered);
+}
+function bindDD(id,build){
+  DD[id]={build};
+  document.getElementById(id+'Btn').onclick=()=>{
+    const pop=document.getElementById(id+'Pop'), open=pop.classList.contains('open');
+    closeAllPops();
+    if(!open){ build(pop); pop.classList.add('open'); const s=pop.querySelector('.ms-search'); if(s) s.focus(); }
+  };
+}
+
+/* Multi-select with optional search, groups and select-all.
+   cfg: {id, options()->[{v,l,s?,g?}], isSel(v), setMany(vals,on), allText, noneText, search, note(), onChange(), max} */
+function multiSelect(cfg){
+  const draw=pop=>{
+    pop.innerHTML=''; let q='';
+    if(cfg.search){
+      const s=document.createElement('input'); s.className='ms-search'; s.placeholder=cfg.search;
+      s.oninput=()=>{ q=s.value.trim().toLowerCase(); drawList(); };
+      pop.appendChild(s);
+    }
+    const note=cfg.note&&cfg.note(); if(note){ const n=document.createElement('div'); n.className='pop-hint'; n.textContent=note; pop.appendChild(n); }
+    const allLab=document.createElement('label'); allLab.className='all';
+    allLab.innerHTML=`<input type="checkbox"><span class="lt">${cfg.allLabel||'Select all'}</span>`;
+    const allBox=allLab.querySelector('input'); pop.appendChild(allLab);
+    const list=document.createElement('div'); pop.appendChild(list);
+    let vis=[];
+    const visible=()=>{ const o=cfg.options(); return q?o.filter(x=>(x.l+' '+(x.g||'')+' '+(x.s||'')).toLowerCase().includes(q)):o; };
+    const refresh=()=>{
+      setChecked(allBox,vis.filter(o=>cfg.isSel(o.v)).length,vis.length);
+      list.querySelectorAll('input[data-g]').forEach(b=>{ const items=vis.filter(o=>o.g===b.dataset.g); setChecked(b,items.filter(o=>cfg.isSel(o.v)).length,items.length); });
+    };
+    const drawList=()=>{
+      vis=visible();
+      const max=cfg.max||600, shown=vis.slice(0,max), parts=[]; let lastG=null;
+      shown.forEach((o,i)=>{
+        if(o.g!==undefined && o.g!==lastG){ parts.push(`<label class="grp"><input type="checkbox" data-g="${esc(o.g)}"><span class="lt">${esc(cfg.groupLabel?cfg.groupLabel(o.g):o.g)}</span></label>`); lastG=o.g; }
+        parts.push(`<label class="${o.g!==undefined?'in':''}"><input type="checkbox" data-i="${i}" ${cfg.isSel(o.v)?'checked':''}><span class="lt" title="${esc(o.l)}">${esc(o.l)}</span>${o.s?`<span class="ls">${esc(o.s)}</span>`:''}</label>`);
+      });
+      if(!vis.length) parts.push('<div class="pop-more">No matches</div>');
+      if(vis.length>max) parts.push(`<div class="pop-more">Showing ${max} of ${vis.length.toLocaleString('en-IN')}. Type to search for the rest. Select all still covers every match.</div>`);
+      list.innerHTML=parts.join('');
+      refresh();
+    };
+    list.onchange=e=>{
+      const t=e.target;
+      if(t.dataset.g!==undefined) cfg.setMany(vis.filter(o=>o.g===t.dataset.g).map(o=>o.v),t.checked);
+      else cfg.setMany([vis[+t.dataset.i].v],t.checked);
+      if(t.dataset.g!==undefined) drawList(); else refresh();
+      changed();
+    };
+    allBox.onchange=()=>{ cfg.setMany(vis.map(o=>o.v),allBox.checked); drawList(); changed(); };
+    const changed=()=>{ if(cfg.onChange) cfg.onChange(); updateButtons(); scheduleRender(); };
+    drawList();
+  };
+  cfg.btnText=()=>{
+    if(!RAW.length) return [cfg.allText,false];
+    const o=cfg.options(), sel=o.filter(x=>cfg.isSel(x.v));
+    if(!o.length) return [cfg.emptyText||'None available',false];
+    if(sel.length===o.length) return [cfg.allText,false];
+    if(sel.length===0) return [cfg.noneText||'None selected',true];
+    if(sel.length===1) return [sel[0].l,true];
+    return [`${sel.length} selected`,true];
+  };
+  bindDD(cfg.id,draw); DD[cfg.id].cfg=cfg;
+}
+/* Single choice list */
+function singleSelect(id,opts,get,set,extra){
+  bindDD(id,pop=>{
+    const draw=()=>{
+      pop.innerHTML='';
+      opts().forEach(o=>{
+        const lab=document.createElement('label');
+        lab.innerHTML=`<span class="radio ${get()===o.v?'on':''}"></span><span class="lt">${esc(o.l)}</span>`;
+        lab.onclick=e=>{ e.preventDefault(); set(o.v); updateButtons(); draw(); if(!extra||!extra.keepOpen||!extra.keepOpen()) closeAllPops(); render(); };
+        pop.appendChild(lab);
+      });
+      if(extra&&extra.after) extra.after(pop);
+    };
+    draw();
+  });
+  DD[id].single={opts,get};
+}
+
+/* ---- filter definitions ---- */
+singleSelect('source',()=>['Frontend','Backend','AppsFlyer'].map(v=>({v,l:v})),()=>state.source,v=>{ state.source=v; });
+singleSelect('gran',()=>[{v:'week',l:'Week on week'},{v:'day',l:'Day by day'}],()=>state.gran,v=>{ state.gran=v; });
+singleSelect('compare',()=>[{v:'none',l:'None'},{v:'previous',l:'Previous period'},{v:'lastweek',l:'Same time last week'},{v:'custom',l:'Custom period'}],
+  ()=>state.compare,v=>{ state.compare=v; },
+  { keepOpen:()=>state.compare==='custom',
+    after:pop=>{
+      if(state.compare!=='custom') return;
+      const w=document.createElement('div');
+      w.style.cssText='display:flex;gap:6px;margin-top:6px;padding-top:8px;border-top:1px solid var(--line)';
+      w.innerHTML=`<input type="date" value="${state.compareFrom?toInputDate(state.compareFrom):''}"><input type="date" value="${state.compareTo?toInputDate(state.compareTo):''}">`;
+      const [a,b]=w.querySelectorAll('input');
+      a.onchange=e=>{ state.compareFrom=e.target.value?new Date(e.target.value+'T00:00:00'):null; render(); };
+      b.onchange=e=>{ state.compareTo=e.target.value?new Date(e.target.value+'T00:00:00'):null; render(); };
+      pop.appendChild(w);
+    }});
+
+const toggleSet=(set,vals,on)=>vals.forEach(v=>on?set.add(v):set.delete(v));
+multiSelect({id:'channel',allText:'All channels',allLabel:'Select all channels',
+  options:()=>ALL_CHANNELS.map(c=>({v:c,l:c})),isSel:v=>state.channels.has(v),setMany:(v,on)=>toggleSet(state.channels,v,on)});
+multiSelect({id:'campaign',allText:'All campaigns',allLabel:'Select all campaigns',search:'Search campaigns…',
+  options:()=>visibleCampaigns().map(c=>{ const n=visibleAdgroups(c).length; return {v:c.name,l:c.name,s:`${n} ad group${n===1?'':'s'}`}; }),
+  isSel:v=>state.campaigns.has(v),setMany:(v,on)=>toggleSet(state.campaigns,v,on)});
+multiSelect({id:'adgroup',allText:'All ad groups',allLabel:'Select all ad groups',search:'Search ad groups…',emptyText:'Select a campaign',
+  note:()=>state.campaigns.size<ALL_CAMPAIGNS.length?'Showing ad groups of the selected campaign(s) only.':'',
+  options:()=>{ const out=[]; for(const c of visibleCampaigns()){ if(!state.campaigns.has(c.name)) continue; for(const a of visibleAdgroups(c)) out.push({v:a.v,l:a.name,g:c.name}); } return out; },
+  isSel:v=>state.adgroups.has(v),setMany:(v,on)=>toggleSet(state.adgroups,v,on)});
+multiSelect({id:'year',allText:'All years',allLabel:'Select all years',
+  options:()=>ALL_YEARS.map(y=>({v:y,l:String(y),s:weeksOfYear(y).length+' weeks'})),
+  isSel:v=>state.years.has(v),
+  setMany:(v,on)=>v.forEach(y=>{ if(on){ state.years.add(y); weeksOfYear(y).forEach(w=>state.weeks.add(w)); } else { state.years.delete(y); weeksOfYear(y).forEach(w=>state.weeks.delete(w)); } })});
+multiSelect({id:'week',allText:'All weeks',allLabel:'Select all weeks',search:'Search weeks…',emptyText:'Select a year',
+  groupLabel:g=>`${g} — all weeks`,
+  options:()=>visibleWeeks().map(n=>({v:n,l:WEEK_SHORT[n],g:String(WEEK_YEAR[n])})),
+  isSel:v=>state.weeks.has(v),setMany:(v,on)=>toggleSet(state.weeks,v,on)});
+multiSelect({id:'day',allText:'All days',allLabel:'Select all days',
+  options:()=>DAYS.map((d,i)=>({v:i,l:d})),isSel:v=>state.days.has(v),setMany:(v,on)=>toggleSet(state.days,v,on)});
+multiSelect({id:'metrics',allText:'All metrics',allLabel:'Select all metrics',search:'Search metrics…',
+  note:()=>state.source==='Frontend'?'Drop metrics compare Backend or AppsFlyer with Frontend. Switch the funnel source to see them.':'',
+  options:()=>metricGroups().flatMap(g=>g.items.map(i=>({...i,g:g.title}))),
+  isSel:v=>selectedMetrics.has(v),setMany:(v,on)=>toggleSet(selectedMetrics,v,on)});
+DD.metrics.cfg.btnText=()=>{ const n=activeColumns().length; return [`${n} metric${n===1?'':'s'}`,false]; };
+
+document.getElementById('dateFrom').onchange=e=>{ state.dateFrom=e.target.value?new Date(e.target.value+'T00:00:00'):null; updateButtons(); render(); };
+document.getElementById('dateTo').onchange=e=>{ state.dateTo=e.target.value?new Date(e.target.value+'T00:00:00'):null; updateButtons(); render(); };
+
+function updateButtons(){
+  Object.entries(DD).forEach(([id,d])=>{
+    if(d.cfg){ const [t,f]=d.cfg.btnText(); setBtn(id,t,f); }
+    else if(d.single){ const o=d.single.opts().find(x=>x.v===d.single.get()); setBtn(id,o?o.l:'',false); }
+  });
+  const active=['channel','campaign','adgroup','year','week','day'].filter(id=>DD[id].cfg.btnText()[1]).length+(state.dateFrom||state.dateTo?1:0);
+  const fc=document.getElementById('fcount'); fc.style.display=active?'inline-block':'none'; fc.textContent=active+' active';
+}
+function resetFilters(doRender=true){
+  state.channels=new Set(ALL_CHANNELS); state.years=new Set(ALL_YEARS); state.weeks=new Set(ALL_WEEKS);
+  state.days=new Set([0,1,2,3,4,5,6]);
+  state.campaigns=new Set(ALL_CAMPAIGNS.map(c=>c.name));
+  state.adgroups=new Set(ALL_CAMPAIGNS.flatMap(c=>c.ags.map(a=>a.v)));
+  state.dateFrom=state.dateTo=null; state.compare='none';
+  document.getElementById('dateFrom').value=''; document.getElementById('dateTo').value='';
+  updateButtons(); if(doRender) render();
+}
+document.getElementById('resetBtn').onclick=()=>resetFilters(true);
+
+/* =================== Filtering =================== */
+let _fd=null, _cmp;
+function passesDims(r,allDays){
+  return state.channels.has(r.channel) && state.campaigns.has(r.campaign) && state.adgroups.has(r.agk)
+    && (allDays || (r.dow!=null && state.days.has(r.dow)));
+}
+function filteredData(){
+  if(_fd) return _fd;
+  const from=state.dateFrom?stripTime(state.dateFrom):-Infinity, to=state.dateTo?stripTime(state.dateTo):Infinity;
+  const wk=state.weeks, yr=state.years, allDays=state.days.size===7, out=[];
+  for(let i=0;i<RAW.length;i++){ const r=RAW[i];
+    if(yr.has(r.year) && wk.has(r.weekNum) && passesDims(r,allDays) && (r.dk==null || (r.dk>=from && r.dk<=to))) out.push(r); }
+  return _fd=out;
+}
+function computeComparison(){ if(_cmp!==undefined) return _cmp; return _cmp=computeComparisonRaw(); }
+function computeComparisonRaw(){
+  if(state.compare==='none') return null;
+  let curFrom,curTo;
+  if(state.dateFrom && state.dateTo){ curFrom=state.dateFrom; curTo=state.dateTo; }
+  else {
+    let mn=Infinity,mx=-Infinity;
+    for(const r of filteredData()){ if(r.dk==null) continue; if(r.dk<mn) mn=r.dk; if(r.dk>mx) mx=r.dk; }
+    if(mn===Infinity) return null;
+    curFrom=new Date(mn); curTo=new Date(mx);
+  }
+  const dayMs=86400000, lengthDays=Math.round((stripTime(curTo)-stripTime(curFrom))/dayMs)+1;
+  let cmpFrom,cmpTo;
+  if(state.compare==='previous'){ cmpTo=new Date(stripTime(curFrom)-dayMs); cmpFrom=new Date(stripTime(cmpTo)-(lengthDays-1)*dayMs); }
+  else if(state.compare==='lastweek'){ cmpFrom=new Date(stripTime(curFrom)-7*dayMs); cmpTo=new Date(stripTime(curTo)-7*dayMs); }
+  else if(state.compare==='custom'){ if(!state.compareFrom||!state.compareTo) return null; cmpFrom=state.compareFrom; cmpTo=state.compareTo; }
+  else return null;
+  const cf=stripTime(curFrom),ct=stripTime(curTo),pf=stripTime(cmpFrom),pt=stripTime(cmpTo);
+  const curAgg=newAgg(), cmpAgg=newAgg(), add=compiledAdd(), allDays=state.days.size===7;
+  for(const r of RAW){
+    if(r.dk==null || !passesDims(r,allDays)) continue;
+    if(r.dk>=cf && r.dk<=ct) add(curAgg,r);
+    if(r.dk>=pf && r.dk<=pt) add(cmpAgg,r);
+  }
+  return {curFrom,curTo,cmpFrom,cmpTo,curAgg,cmpAgg};
+}
+
+/* =================== Render =================== */
+function render(){
+  if(!RAW.length) return;
+  _fd=null; _cmp=undefined;
+  renderMeta(); renderKpis(); renderCompareBanner();
+  const tab=document.querySelector('.nav-item.tab.active').dataset.tab;
+  if(tab==='overview') renderOverview(); else renderCampaign();
+}
+function onDataLoaded(){
+  document.getElementById('kpiArea').style.display='block';
+  updateButtons(); render();
+}
+function emptyState(msg){
+  return `<div class="empty"><div class="big-ic">${icon('filter')}</div><h3>No data to show</h3><div>${msg||'No rows match the current filters.'}</div></div>`;
+}
+function renderMeta(){
+  const fd=t=>new Date(t).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('fileName').textContent=FILE_NAME||'Uploaded file';
+  document.getElementById('fileName').title=FILE_NAME;
+  document.getElementById('fileSub').textContent=`${SRC_ROWS.toLocaleString('en-IN')} rows`+(MIN_DK!=null?` · ${fd(MIN_DK)} – ${fd(MAX_DK)}`:'');
+}
+
+/* ---- KPI cards with sparklines ---- */
+function sparkSvg(vals,type){
+  if(vals.length<2) return '';
+  const W=120,H=56,P=4, mx=Math.max(...vals), mn=Math.min(...vals), rng=(mx-mn)||1;
+  const x=i=>P+i*(W-2*P)/(vals.length-1), y=v=>H-P-(v-mn)/rng*(H-2*P);
+  if(type==='bars'){
+    const n=vals.length, bw=Math.max(3,Math.min(12,(W-2*P)/n*0.6)), step=(W-2*P)/n;
+    return `<svg viewBox="0 0 ${W} ${H}">${vals.map((v,i)=>{ const h=Math.max(2,(v/(mx||1))*(H-2*P)); return `<rect x="${(P+i*step+(step-bw)/2).toFixed(1)}" y="${(H-P-h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="#fff" opacity=".9" rx="1"/>`; }).join('')}</svg>`;
+  }
+  const pts=vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const area=type==='area'?`<polygon points="${P},${H-P} ${pts} ${W-P},${H-P}" fill="#fff" opacity=".3"/>`:'';
+  return `<svg viewBox="0 0 ${W} ${H}">${area}<polyline points="${pts}" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+function renderKpis(){
+  const data=filteredData();
+  const kpiEl=document.getElementById('kpis'), statEl=document.getElementById('stats');
+  if(!data.length){ kpiEl.innerHTML=''; statEl.innerHTML=''; statEl.style.display='none'; return; }
+  statEl.style.display='';
+  const total=newAgg(), add=compiledAdd();
+  const weekSet=new Set(); for(const r of data) weekSet.add(r.weekNum);
+  const byWeek=weekSet.size>=2, series=new Map();
+  for(const r of data){
+    add(total,r);
+    const k=byWeek?r.weekNum:r.dk; let a=series.get(k); if(!a){ a=newAgg(); series.set(k,a); } add(a,r);
+  }
+  const pts=[...series.entries()].sort((a,b)=>a[0]-b[0]).map(e=>e[1]).slice(-12);
+  const unit=byWeek?'previous week':'previous day';
+  const cards=[
+    {k:'Spend',l:'Total Spend',f:'money',c:'blue',t:'line'},
+    {k:'Installs',l:'Installs',f:'int',c:'green',t:'area'},
+    {k:'Lead',l:`Leads <span class="src">· ${state.source}</span>`,f:'int',c:'orange',t:'bars'},
+    {k:'FOD',l:`FOD <span class="src">· ${state.source}</span>`,f:'int',c:'cyan',t:'line'}
+  ];
+  kpiEl.innerHTML=cards.map(c=>{
+    const vals=pts.map(p=>p[c.k]||0);
+    let delta='';
+    if(vals.length>=2){
+      const a=vals[vals.length-1], b=vals[vals.length-2];
+      if(b){ const d=(a-b)/b*100; delta=`<div class="kpi-d">${icon(d>=0?'up':'down')}${d>=0?'+':''}${d.toFixed(1)}% vs ${unit}</div>`; }
+    }
+    return `<div class="kpi ${c.c}"><div class="kpi-l">${c.l}</div><div class="kpi-v">${fmt(total[c.k]||0,c.f)}</div>${delta}<div class="kpi-spark">${sparkSvg(vals,c.t)}</div></div>`;
+  }).join('');
+  const stats=[
+    {l:'Impressions',v:fmt(total.Impr,'int'),ic:'eye',c:'blue'},
+    {l:'Clicks',v:fmt(total.Clicks,'int'),ic:'pointer',c:'green'},
+    {l:`OB`,v:fmt(total.OB||0,'int'),ic:'check',c:'orange'},
+    {l:`Payment`,v:fmt(total.Payment||0,'int'),ic:'card',c:'cyan'},
+    {l:'CPI',v:fmt(div(total.Spend,total.Installs),'money2'),ic:'coin',c:'blue'},
+    {l:'CPL',v:fmt(div(total.Spend,total.Lead),'money'),ic:'target',c:'green'},
+    {l:'CPOB',v:fmt(div(total.Spend,total.OB),'money'),ic:'target',c:'orange'},
+    {l:'CTR',v:fmt(div(total.Clicks,total.Impr),'pct2'),ic:'pointer',c:'cyan'}
+  ];
+  statEl.innerHTML=stats.map(s=>`<div class="stat"><div class="stat-ic bg-${s.c}">${icon(s.ic)}</div><div><div class="stat-l">${s.l}</div><div class="stat-v">${s.v}</div></div></div>`).join('');
+}
+function renderCompareBanner(){
+  const el=document.getElementById('compareBanner');
+  const c=computeComparison();
+  if(!c){ el.style.display='none'; return; }
+  el.style.display='block';
+  const cols=activeColumns();
+  const fd=d=>d.toLocaleDateString('en-IN',{month:'short',day:'numeric',year:'numeric'});
+  let html=`<div class="compare-head">${fd(c.curFrom)} – ${fd(c.curTo)} vs ${fd(c.cmpFrom)} – ${fd(c.cmpTo)}</div><div class="compare-grid">`;
+  cols.forEach(col=>{
+    const curVal=colValue(c.curAgg,col), cmpVal=colValue(c.cmpAgg,col);
+    let deltaStr='—', cls='';
+    if(cmpVal!=null && cmpVal!==0 && curVal!=null && !isNaN(curVal)){ const d=(curVal-cmpVal)/Math.abs(cmpVal)*100; deltaStr=(d>=0?'+':'')+d.toFixed(1)+'%'; cls=d>=0?'up':'down'; }
+    html+=`<div><div class="cc-label">${col.l}</div><div class="cc-val">${fmt(curVal,col.fmt)}</div><div class="cc-delta ${cls}">${deltaStr} <span class="cc-prev">vs ${fmt(cmpVal,col.fmt)}</span></div></div>`;
+  });
+  el.innerHTML=html+'</div>';
+}
+
+/* ---- Overview: metrics in rows, periods in columns ---- */
+function periodHead(p){
+  if(state.gran==='week'){
+    return `<th class="ph"><div class="ph-y">${esc(WEEK_YEAR[p.id])}</div><div class="ph-w">${esc(WEEK_NAME[p.id])}</div><div class="ph-d">${esc(WEEK_RANGE[p.id])}</div></th>`;
+  }
+  const d=new Date(p.id);
+  return `<th class="ph"><div class="ph-y">${d.getFullYear()}</div><div class="ph-w">${d.toLocaleDateString('en-IN',{weekday:'short'})}</div><div class="ph-d">${d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div></th>`;
+}
+function renderOverview(){
+  const cols=activeColumns(), data=filteredData(), el=document.getElementById('overviewTable');
+  document.getElementById('ovGran').textContent=state.gran==='week'?'week':'day';
+  if(!cols.length){ el.innerHTML=emptyState('No metrics selected. Pick some under Columns.'); return; }
+  if(!data.length){ el.innerHTML=emptyState(); return; }
+  const add=compiledAdd(), byWeek=state.gran==='week';
+  const pmap=new Map(), chTot=new Map(), grand=newAgg();
+  for(const r of data){
+    const id=byWeek?r.weekNum:r.dk; if(id==null) continue;
+    let p=pmap.get(id); if(!p){ p={id,total:newAgg(),ch:new Map()}; pmap.set(id,p); }
+    add(p.total,r); add(grand,r);
+    let c=p.ch.get(r.channel); if(!c){ c=newAgg(); p.ch.set(r.channel,c); } add(c,r);
+    let t=chTot.get(r.channel); if(!t){ t=newAgg(); chTot.set(r.channel,t); } add(t,r);
+  }
+  const periods=[...pmap.values()].sort((a,b)=>a.id-b.id);
+  const chans=[...chTot.entries()].sort((a,b)=>b[1].Spend-a[1].Spend).map(e=>e[0]);
+  const EMPTY=newAgg(), n=periods.length;
+  document.getElementById('ovSub').textContent=`${n} ${byWeek?'week':'day'}${n===1?'':'s'} side by side · metrics in rows`;
+  const sections=[{name:chans.length>1?'All channels':null,chip:chans.length===1?chans[0]:null,get:p=>p.total,tot:grand}];
+  if(chans.length>1) chans.forEach(ch=>sections.push({chip:ch,get:p=>p.ch.get(ch)||EMPTY,tot:chTot.get(ch)}));
+  const parts=[`<table class="ov"><thead><tr><th>Metric</th>${periods.map(periodHead).join('')}<th class="tot-col">Total</th></tr></thead><tbody>`];
+  sections.forEach(sec=>{
+    parts.push(`<tr class="sec-row"><td>${sec.chip?chipHtml(sec.chip):esc(sec.name)}</td><td colspan="${n+1}"></td></tr>`);
+    cols.forEach(c=>{
+      parts.push(`<tr><td class="metric">${esc(c.l)}</td>${periods.map(p=>cellHtml(sec.get(p),c)).join('')}${cellHtml(sec.tot,c,'tot-col')}</tr>`);
+    });
+  });
+  parts.push('</tbody></table>');
+  el.innerHTML=parts.join('');
+}
+
+/* ---- Campaign view (weeks side by side when 2-8 are selected) ---- */
+const MAX_SPLIT=8;
+let _camps=[], _cv={};
+function renderCampaign(){
+  const cols=activeColumns(), rows=filteredData(), el=document.getElementById('campaignTable');
+  const noteEl=document.getElementById('campNote'), scopeEl=document.getElementById('campScope');
+  noteEl.innerHTML=HAS_ADGROUP?'':'<div class="note">No ad group column was found in the CSV (expected a header like "Ad Group", "Ad group name" or "Ad Set"), so ad groups show as "Unassigned".</div>';
+  if(!cols.length){ el.innerHTML=emptyState('No metrics selected. Pick some under Columns.'); scopeEl.innerHTML=''; return; }
+  if(!rows.length){ el.innerHTML=emptyState(); scopeEl.innerHTML=''; document.getElementById('campSub').textContent=''; return; }
+
+  const wkSet=new Set(); for(const r of rows) if(r.weekNum!=null) wkSet.add(r.weekNum);
+  const weeks=[...wkSet].sort((a,b)=>a-b);
+  const canSplit=weeks.length>=2 && weeks.length<=MAX_SPLIT;
+  const split=state.splitWeeks && canSplit;
+  const add=compiledAdd();
+  const mk=()=>({agg:newAgg(),wk:split?new Map():null});
+  const addTo=(o,r)=>{ add(o.agg,r); if(split){ let w=o.wk.get(r.weekNum); if(!w){ w=newAgg(); o.wk.set(r.weekNum,w); } add(w,r); } };
+  const cmap=new Map(), grand=mk();
+  for(const r of rows){
+    let c=cmap.get(r.ck);
+    if(!c){ c={ck:r.ck,camp:r.campaign,ch:r.channel,...mk(),agm:new Map()}; cmap.set(r.ck,c); }
+    addTo(c,r); addTo(grand,r);
+    let a=c.agm.get(r.adgroup); if(!a){ a=mk(); c.agm.set(r.adgroup,a); } addTo(a,r);
+  }
+  const camps=[...cmap.values()].sort((a,b)=>b.agg.Spend-a.agg.Spend);
+  camps.forEach(c=>{ c.ags=[...c.agm.entries()].map(([ag,o])=>({ag,...o})).sort((a,b)=>b.agg.Spend-a.agg.Spend); delete c.agm; });
+  _camps=camps; _cv={cols,weeks,split};
+  const shown=showAllCamps?camps:camps.slice(0,CAMP_LIMIT);
+  const totalSpend=grand.agg.Spend||0;
+
+  document.getElementById('campSub').textContent=`${camps.length.toLocaleString('en-IN')} campaign${camps.length===1?'':'s'} · sorted by spend, highest first`+(split?` · ${weeks.length} weeks side by side`:'');
+  scopeEl.innerHTML=`<label class="toggle" title="${canSplit?'':'Select 2 to '+MAX_SPLIT+' weeks to compare them side by side'}"><input type="checkbox" id="splitToggle" ${state.splitWeeks?'checked':''} ${canSplit?'':'disabled'}> Weeks side by side${canSplit?'':` <span class="muted">(select 2–${MAX_SPLIT} weeks)</span>`}</label>
+    <button class="btn-ghost" id="expandAll">Expand all</button><button class="btn-ghost" id="collapseAll">Collapse all</button>`;
+
+  let head;
+  if(split){
+    head=`<thead><tr class="r1"><th rowspan="2">Campaign / Ad group</th><th rowspan="2" class="l">Channel</th>${cols.map(c=>`<th class="grp${c.k==='Spend'?' sorted':''}" colspan="${weeks.length}">${esc(c.l)}${c.k==='Spend'?' ↓':''}</th>`).join('')}</tr>
+      <tr class="r2">${cols.map(()=>weeks.map((w,i)=>`<th class="${i===0?'gs':''}" title="${esc(WEEK_LABELS[w])}">${esc(WEEK_NAME[w].replace(/^Week\s*/i,'W'))} <span class="ph-d">${esc(WEEK_YEAR[w])}</span></th>`).join('')).join('')}</tr></thead>`;
+  } else {
+    head=`<thead><tr><th>Campaign / Ad group</th><th class="l">Channel</th>${cols.map(c=>`<th class="${c.k==='Spend'?'sorted':''}">${esc(c.l)}${c.k==='Spend'?' ↓':''}</th>`).join('')}</tr></thead>`;
+  }
+  const parts=['<table>',head,'<tbody>'];
+  shown.forEach((c,i)=>{
+    const isOpen=expanded.has(c.ck), share=totalSpend?(c.agg.Spend/totalSpend*100):0;
+    parts.push(`<tr class="camp-row" data-i="${i}" title="${share.toFixed(1)}% of total spend"><td><div class="cname-wrap"><span class="caret${isOpen?' open':''}">▸</span><span class="rank">${i+1}</span><span class="cname">${esc(c.camp)}</span><span class="agc">${c.ags.length} ad group${c.ags.length===1?'':'s'}</span></div><div class="share"><span style="width:${share.toFixed(2)}%"></span></div></td><td class="l">${chipHtml(c.ch)}</td>${metricCells(c)}</tr>`);
+    if(isOpen) parts.push(agRowsHtml(c,i));
+  });
+  const ncol=2+cols.length*(split?weeks.length:1);
+  if(camps.length>shown.length) parts.push(`<tr class="more-row"><td colspan="${ncol}"><button class="btn-ghost" id="showAllCamps">Show all ${camps.length.toLocaleString('en-IN')} campaigns (top ${CAMP_LIMIT} shown)</button></td></tr>`);
+  parts.push(`</tbody><tfoot><tr><td>Total <span class="muted">· ${camps.length.toLocaleString('en-IN')} campaign${camps.length===1?'':'s'}</span></td><td></td>${metricCells(grand)}</tr></tfoot></table>`);
+  el.innerHTML=parts.join('');
+
+  el.onclick=e=>{
+    const row=e.target.closest('.camp-row'); if(!row) return;
+    const i=+row.dataset.i, c=_camps[i], caret=row.querySelector('.caret');
+    if(expanded.has(c.ck)){ expanded.delete(c.ck); caret.classList.remove('open'); el.querySelectorAll(`.ag-row[data-parent="${i}"]`).forEach(n=>n.remove()); }
+    else { expanded.add(c.ck); caret.classList.add('open'); row.insertAdjacentHTML('afterend',agRowsHtml(c,i)); }
+  };
+  document.getElementById('splitToggle').onchange=e=>{ state.splitWeeks=e.target.checked; renderCampaign(); };
+  document.getElementById('expandAll').onclick=()=>{ shown.forEach(c=>expanded.add(c.ck)); renderCampaign(); };
+  document.getElementById('collapseAll').onclick=()=>{ expanded.clear(); renderCampaign(); };
+  const more=document.getElementById('showAllCamps'); if(more) more.onclick=ev=>{ ev.stopPropagation(); showAllCamps=true; renderCampaign(); };
+}
+function metricCells(o){
+  const {cols,weeks,split}=_cv;
+  if(!split) return cellsHtml(o.agg,cols);
+  const E=newAgg();
+  return cols.map(c=>weeks.map((w,i)=>cellHtml(o.wk.get(w)||E,c,i===0?'gs':'')).join('')).join('');
+}
+function agRowsHtml(c,i){
+  return c.ags.map(a=>`<tr class="ag-row" data-parent="${i}"><td>${esc(a.ag)}</td><td></td>${metricCells(a)}</tr>`).join('');
+}
+
+/* =================== Initial empty state =================== */
+(function(){
+  const msg=`<div class="empty"><div class="big-ic">${icon('upload')}</div><h3>Upload a CSV to get started</h3><div>Spend, funnel and efficiency metrics by campaign and ad group.</div><button class="side-upload" onclick="document.getElementById('fileInput').click()">${icon('upload')}Upload CSV</button></div>`;
+  document.getElementById('overviewTable').innerHTML=msg;
+  document.getElementById('campaignTable').innerHTML=msg;
+  updateButtons();
+})();
+
+</script>
+</body>
+</html>
