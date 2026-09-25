@@ -53,8 +53,24 @@ button{font:inherit}
 .nav-item:hover{background:var(--side2);color:#fff}
 .nav-item.active{background:var(--side2);color:#fff;border-left-color:var(--primary);font-weight:600}
 .nav-item.active svg.i{color:var(--primary)}
-.side-upload{margin:6px 22px 0;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--primary);color:#fff;border:none;border-radius:8px;height:38px;cursor:pointer;font-weight:600;font-size:13.5px}
+.side-upload{margin:6px 22px 0;width:calc(100% - 44px);display:flex;align-items:center;justify-content:center;gap:8px;background:var(--primary);color:#fff;border:none;border-radius:8px;height:38px;cursor:pointer;font-weight:600;font-size:13.5px}
 .side-upload:hover{filter:brightness(1.08)}
+.src-box{padding:0 20px}
+.src-l{display:block;font-size:11px;font-weight:650;color:var(--side-dim);margin:8px 0 5px;letter-spacing:.02em}
+.src-in{width:100%;height:36px;border-radius:8px;border:1px solid var(--side-line);background:var(--side2);color:#fff;padding:0 10px;font:inherit;font-size:12.5px;outline:none}
+.src-in:focus{border-color:var(--primary)}
+.src-in::placeholder{color:var(--side-dim)}
+.src-err{font-size:11.5px;color:#ff9b8a;margin-top:6px;line-height:1.35;display:none}
+.src-err.show{display:block}
+.src-status{font-size:11.5px;color:var(--side-dim);margin-top:6px}
+.src-status.ok{color:#6fd3a8} .src-status.busy{color:#9db8ff}
+.src-link{display:block;width:100%;margin-top:6px;background:none;border:none;color:var(--side-dim);font-size:11.5px;cursor:pointer;text-decoration:underline;padding:4px 0}
+.src-link:hover{color:#fff}
+.side-or{display:flex;align-items:center;gap:10px;margin:14px 20px 6px;color:var(--side-dim);font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+.side-or:before,.side-or:after{content:"";flex:1;height:1px;background:var(--side-line)}
+.side-upload.ghost{background:transparent;border:1px solid var(--side-line);color:var(--side-ink);margin:6px 20px 0;width:calc(100% - 40px)}
+.side-upload.ghost:hover{border-color:var(--primary);color:#fff}
+.sidebar{overflow-y:auto}
 .side-hint{font-size:11.5px;color:var(--side-dim);padding:8px 22px 0;line-height:1.4}
 .side-foot{margin-top:auto;border-top:1px solid var(--side-line);padding:14px 18px;display:flex;align-items:center;gap:11px}
 .file-badge{width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;flex:none}
@@ -220,7 +236,17 @@ td.metric .mk{font-size:10.5px;color:var(--faint);font-weight:500;margin-left:6p
 .empty h3{margin:10px 0 6px;color:var(--ink);font-size:16px}
 .empty .big-ic{width:56px;height:56px;border-radius:50%;background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary);display:inline-grid;place-items:center}
 .empty .big-ic svg.i{width:26px;height:26px}
-.empty .side-upload{display:inline-flex;margin-top:14px;padding:0 18px}
+.side-upload.ghost2{background:var(--panel);color:var(--ink);border:1px solid var(--line2);text-decoration:none}
+.side-upload.ghost2:hover{border-color:var(--primary);color:var(--primary)}
+.fix-guide{max-width:600px;margin:22px auto 0;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 18px;color:var(--ink);font-size:13px}
+.fix-guide .fg-t{font-weight:650;margin-bottom:6px}
+.fix-guide ol{margin:0 0 8px;padding-left:20px;line-height:1.6}
+.fix-guide code{background:var(--hover);padding:1px 5px;border-radius:4px;font-size:12px}
+.diag{max-width:600px;margin:14px auto 0;text-align:left;font-size:12px;color:var(--sub)}
+.diag summary{cursor:pointer}
+.diag-body{margin-top:8px;padding:10px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;gap:8px;word-break:break-word}
+.empty{overflow-y:auto}
+.empty .side-upload{display:inline-flex;margin-top:14px;padding:0 18px;width:auto}
 
 /* compare */
 .compare-banner{padding:14px 18px;margin-bottom:18px}
@@ -233,13 +259,24 @@ td.metric .mk{font-size:10.5px;color:var(--faint);font-weight:500;margin-left:6p
 .cc-prev{color:var(--faint)}
 
 /* loader */
-#loader{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(15,20,30,.4);backdrop-filter:blur(2px)}
+#loader{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(15,20,30,.42);backdrop-filter:blur(2px)}
 #loader.show{display:flex}
-.load-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 26px;width:min(380px,90vw);box-shadow:0 20px 50px rgba(0,0,0,.25)}
-.load-title{font-weight:650;margin-bottom:4px}
-.load-sub{font-size:12.5px;color:var(--sub);margin-bottom:12px;font-variant-numeric:tabular-nums}
-.load-track{height:6px;background:var(--line);border-radius:6px;overflow:hidden}
-.load-fill{height:100%;width:0;background:var(--primary);transition:width .15s}
+.load-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px 20px;width:min(430px,92vw);box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.load-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}
+.load-title{font-weight:650;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.load-pct{font-size:24px;font-weight:650;color:var(--primary);font-variant-numeric:tabular-nums}
+.load-track{height:8px;background:var(--line);border-radius:8px;overflow:hidden;position:relative}
+.load-fill{height:100%;width:0;background:var(--primary);border-radius:8px;transition:width .25s ease}
+.load-track.indet .load-fill{width:35%!important;position:absolute;animation:indet 1.2s ease-in-out infinite}
+@keyframes indet{0%{left:-35%}100%{left:100%}}
+.load-sub{font-size:12.5px;color:var(--sub);margin-top:10px;font-variant-numeric:tabular-nums;display:flex;justify-content:space-between;gap:10px}
+.load-steps{display:flex;gap:6px;margin-top:16px}
+.load-step{flex:1;font-size:11px;color:var(--faint);display:flex;flex-direction:column;gap:6px;min-width:0}
+.load-step i{display:block;height:3px;border-radius:3px;background:var(--line)}
+.load-step.on{color:var(--primary);font-weight:650} .load-step.on i{background:var(--primary);opacity:.55}
+.load-step.done{color:var(--success)} .load-step.done i{background:var(--success)}
+#topProg{position:fixed;left:0;top:env(safe-area-inset-top,0px);height:3px;width:0;background:var(--primary);z-index:120;box-shadow:0 0 8px color-mix(in srgb,var(--primary) 60%,transparent);transition:width .25s ease,opacity .4s ease;opacity:0}
+#topProg.show{opacity:1}
 
 @media (max-width:1100px){ .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media (max-width:900px){
@@ -252,7 +289,13 @@ td.metric .mk{font-size:10.5px;color:var(--faint);font-weight:500;margin-left:6p
 </style>
 </head>
 <body>
-<div id="loader"><div class="load-card"><div class="load-title" id="loadTitle">Reading file…</div><div class="load-sub" id="loadSub"></div><div class="load-track"><div class="load-fill" id="loadFill"></div></div></div></div>
+<div id="topProg"></div>
+<div id="loader"><div class="load-card" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="loadCard">
+  <div class="load-top"><div class="load-title" id="loadTitle">Loading…</div><div class="load-pct" id="loadPct">0%</div></div>
+  <div class="load-track" id="loadTrack"><div class="load-fill" id="loadFill"></div></div>
+  <div class="load-sub"><span id="loadSub"></span><span id="loadTime"></span></div>
+  <div class="load-steps" id="loadSteps"></div>
+</div></div>
 <input type="file" id="fileInput" accept=".csv">
 <div class="shell" id="shell">
   <aside class="sidebar">
@@ -260,9 +303,20 @@ td.metric .mk{font-size:10.5px;color:var(--faint);font-weight:500;margin-left:6p
     <div class="nav-cap">Navigation</div>
     <div class="nav-item tab active" data-tab="overview"><span data-icon="grid"></span>Overview</div>
     <div class="nav-item tab" data-tab="campaign"><span data-icon="layers"></span>Campaign view</div>
-    <div class="nav-cap">Data</div>
-    <button class="side-upload" id="uploadBtn"><span data-icon="upload"></span>Upload CSV</button>
-    <div class="side-hint">Large files are read in chunks, so the page stays responsive.</div>
+    <div class="nav-cap">Data source</div>
+    <div class="src-box">
+      <label class="src-l" for="sheetUrl">Google Sheet link</label>
+      <input class="src-in" id="sheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off" spellcheck="false">
+      <label class="src-l" for="sheetTab">Sheet (tab) name</label>
+      <input class="src-in" id="sheetTab" type="text" placeholder="e.g. dod" autocomplete="off" spellcheck="false">
+      <div class="src-err" id="srcErr"></div>
+      <div class="src-status" id="srcStatus"></div>
+      <button class="side-upload" id="loadSheetBtn" style="margin:10px 0 0;width:100%"><span data-icon="reset"></span>Load data</button>
+      <button class="src-link" id="copyLinkBtn" title="Copy a dashboard link that opens with this sheet and tab">Copy link with this sheet</button>
+    </div>
+    <div class="side-or"><span>or</span></div>
+    <button class="side-upload ghost" id="uploadBtn"><span data-icon="upload"></span>Upload CSV</button>
+    <div class="side-hint">The sheet must be shared as “Anyone with the link can view”. Your link and tab are remembered on this device.</div>
   </aside>
 
   <div class="main">
@@ -271,7 +325,8 @@ td.metric .mk{font-size:10.5px;color:var(--faint);font-weight:500;margin-left:6p
       <div class="top-spacer"></div>
       <div class="top-file" id="topFile"><span data-icon="file"></span><div style="min-width:0"><div class="tf-name" id="fileName">No file loaded</div><div class="tf-sub" id="fileSub">Upload a CSV to begin</div></div></div>
       <div class="top-spacer"></div>
-      <button class="top-upload" id="uploadBtn2"><span data-icon="upload"></span>Upload CSV</button>
+      <button class="top-upload" id="refreshBtn" title="Reload the latest data from the Google Sheet"><span data-icon="reset"></span>Refresh data</button>
+      <button class="icon-btn" id="uploadBtn2" title="Upload a CSV instead"><span data-icon="upload"></span></button>
       <button class="icon-btn" id="themeBtn" title="Switch theme"></button>
     </div>
 
@@ -477,31 +532,243 @@ const FIELD_KEYS={
   'FE Purchase':['fepurchasefirstlogin','fpurchasefirstlogin','frontendpurchasefirstlogin','fepurchase','purchasefirstlogin']
 };
 
-function showLoader(title,sub,frac){
-  document.getElementById('loader').classList.add('show');
+/* Progress: each step owns a slice of the overall bar.
+   frac is progress within the step (0-1), or null when the size is unknown. */
+const PROG_PLANS={
+  sheet:[['connect','Connecting',0,4],['download','Downloading',4,55],['read','Reading rows',55,95],['build','Building',95,100]],
+  file:[['read','Reading rows',0,93],['build','Building',93,100]]
+};
+let PROG={mode:'file',t0:0,timer:null,pct:0};
+function startProgress(mode,title){
+  PROG={mode,t0:performance.now(),timer:null,pct:0};
   document.getElementById('loadTitle').textContent=title;
-  document.getElementById('loadSub').textContent=sub||'';
-  document.getElementById('loadFill').style.width=Math.round((frac||0)*100)+'%';
+  document.getElementById('loadSteps').innerHTML=PROG_PLANS[mode].map(p=>`<div class="load-step" data-s="${p[0]}"><i></i><span>${p[1]}</span></div>`).join('');
+  document.getElementById('loader').classList.add('show');
+  document.getElementById('topProg').classList.add('show');
+  clearInterval(PROG.timer);
+  PROG.timer=setInterval(()=>{ document.getElementById('loadTime').textContent=Math.round((performance.now()-PROG.t0)/1000)+' s'; },500);
+  document.getElementById('loadTime').textContent='0 s';
 }
-function hideLoader(){ document.getElementById('loader').classList.remove('show'); }
+function progress(step,frac,sub){
+  const plan=PROG_PLANS[PROG.mode], k=plan.findIndex(p=>p[0]===step); if(k<0) return;
+  const [,,a,b]=plan[k];
+  const pct=Math.max(PROG.pct, frac==null ? a : a+(b-a)*Math.max(0,Math.min(1,frac)));
+  PROG.pct=pct;
+  const track=document.getElementById('loadTrack');
+  track.classList.toggle('indet', frac==null);
+  document.getElementById('loadFill').style.width=pct.toFixed(1)+'%';
+  document.getElementById('loadPct').textContent=frac==null && pct<1 ? '…' : Math.floor(pct)+'%';
+  document.getElementById('loadCard').setAttribute('aria-valuenow',Math.floor(pct));
+  document.getElementById('topProg').style.width=pct.toFixed(1)+'%';
+  if(sub!=null) document.getElementById('loadSub').textContent=sub;
+  document.querySelectorAll('#loadSteps .load-step').forEach((el,i)=>{ el.classList.toggle('done',i<k); el.classList.toggle('on',i===k); });
+}
+function hideLoader(){
+  clearInterval(PROG.timer);
+  document.getElementById('loader').classList.remove('show');
+  const tp=document.getElementById('topProg'); tp.style.width='100%';
+  setTimeout(()=>{ tp.classList.remove('show'); setTimeout(()=>{ tp.style.width='0'; },400); },250);
+}
 
 document.getElementById('uploadBtn').onclick=()=>document.getElementById('fileInput').click();
+/* =================== Data source =================== */
+// The dashboard reads this Google Sheet tab on open. The sheet must be shared as
+// "Anyone with the link can view" (or published to the web).
+const DEFAULT_SHEET = {url:'https://docs.google.com/spreadsheets/d/1-fTLvMdfDRNHngazg74NxkuZdNONC25fRFt7vVTSJRQ/edit', tab:'dod'};
+// Priority: link parameters (?sheet=…&tab=…) > what this device used last > the default above
+function initialSheetConfig(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('sheet')) return {url:q.get('sheet'), tab:q.get('tab')||''};
+  try{ const v=JSON.parse(localStorage.getItem('cpd-sheet')||'null'); if(v&&v.url) return v; }catch(e){}
+  return {...DEFAULT_SHEET};
+}
+let SHEET=initialSheetConfig();
+// Accepts a normal sheet link, a bare sheet ID, or a "Publish to web" CSV link
+function sheetCsvUrl(cfg){
+  const u=String(cfg.url||'').trim();
+  if(!u) throw new Error('Paste the Google Sheet link first.');
+  if(/\/pub(\?|$)/.test(u) || /output=csv/.test(u)) return u;            // published CSV link: use as is
+  const m=u.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]{20,})/) || u.match(/^([a-zA-Z0-9_-]{25,})$/);
+  if(!m) throw new Error('That doesn’t look like a Google Sheets link. It should contain /spreadsheets/d/…');
+  const tab=String(cfg.tab||'').trim();
+  if(!tab) throw new Error('Enter the sheet (tab) name, for example dod.');
+  return `https://docs.google.com/spreadsheets/d/${m[1]}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(tab)}`;
+}
+function sheetTabLabel(){ return String(SHEET.tab||'').trim() || 'published CSV'; }
+let SOURCE = {kind:null, label:'', loadedAt:null};
+
 document.getElementById('fileInput').addEventListener('change',e=>{
   const f=e.target.files[0]; if(!f) return;
   e.target.value='';                           // allow re-uploading the same file
-  FILE_NAME = f.name||'';
-  const sizeMB=(f.size/1048576).toFixed(1);
-  showLoader('Reading '+FILE_NAME, `0 of ${sizeMB} MB`, 0);
+  SOURCE={kind:'file',label:f.name||'Uploaded file',loadedAt:new Date()};
+  loadBlob(f, SOURCE.label);
+});
 
-  // Stream the file in chunks. Rows with the same date, week, channel, campaign and
-  // ad group are merged as they arrive, so memory and later work stay small.
-  let idx=null, rowCount=0;
-  const groups=new Map(), dateCache=new Map();
-  const dayOf=v=>{ let d=dateCache.get(v); if(d===undefined){ const pd=parseDate(v); d=pd?pd.getTime():null; dateCache.set(v,d); } return d; };
+function setSrcError(msg){ const e=document.getElementById('srcErr'); e.textContent=msg||''; e.classList.toggle('show',!!msg); }
+const IN_CLAUDE = /(^|\.)claude\.ai$|claudeusercontent\.com$/.test(location.hostname);
+function sheetParts(cfg){
+  const u=String(cfg.url||'').trim();
+  const m=u.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]{20,})/) || u.match(/^([a-zA-Z0-9_-]{25,})$/);
+  return {id:m?m[1]:null, tab:String(cfg.tab||'').trim()};
+}
+function setStatus(msg,kind){ const el=document.getElementById('srcStatus'); if(!el) return; el.textContent=msg||''; el.className='src-status'+(kind?' '+kind:''); }
+
+// Way 1: CSV download (fast). Needs the browser to allow the request (CORS).
+async function fetchSheetCsv(url){
+  const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),120000);
+  try{
+    const res=await fetch(url,{cache:'no-store',signal:ctl.signal,redirect:'follow'});
+    progress('connect',1,'Connected');
+    if(!res.ok) throw Object.assign(new Error('HTTP '+res.status),{code:'http',status:res.status});
+    const type=res.headers.get('content-type')||'';
+    const sizeKey='cpd-size:'+url;
+    let expected=+res.headers.get('content-length')||0;
+    if(!expected){ try{ expected=+localStorage.getItem(sizeKey)||0; }catch(e){} }
+    const reader=res.body&&res.body.getReader?res.body.getReader():null, parts=[]; let got=0, last=0;
+    progress('download',expected?0:null,'Downloading…');
+    if(reader){
+      for(;;){ const {done,value}=await reader.read(); if(done) break; parts.push(value); got+=value.length;
+        const now=performance.now(); if(now-last<120) continue; last=now;
+        const mb=(got/1048576).toFixed(1);
+        progress('download', expected?Math.min(0.97,got/expected):null, expected?`${mb} of ~${(expected/1048576).toFixed(1)} MB`:`${mb} MB downloaded`); }
+    } else parts.push(new Uint8Array(await res.arrayBuffer()));
+    try{ localStorage.setItem(sizeKey,String(got)); }catch(e){}
+    progress('download',1,`${(got/1048576).toFixed(1)} MB downloaded`);
+    const blob=new Blob(parts,{type:'text/csv'});
+    const head=await blob.slice(0,600).text();
+    if(/<html|<!doctype/i.test(head) || /text\/html/i.test(type)){
+      const title=(head.match(/<title>([^<]*)/i)||[])[1]||'';
+      throw Object.assign(new Error('Google sent a web page instead of data'+(title?` (“${title.trim()}”)`:'')),{code:'not_public',status:res.status,type,finalUrl:res.url});
+    }
+    return blob;
+  } catch(e){
+    if(e.name==='AbortError') throw Object.assign(new Error('timeout'),{code:'timeout'});
+    if(!e.code) e.code='network';
+    throw e;
+  } finally { clearTimeout(to); }
+}
+// Way 2: Google's script (JSONP) endpoint. Works where plain requests are blocked by CORS.
+function fetchSheetJsonp(id,tab){
+  return new Promise((resolve,reject)=>{
+    const cb='__cpdSheet'+Date.now();
+    const sc=document.createElement('script');
+    const timer=setTimeout(()=>{ cleanup(); reject(Object.assign(new Error('timeout'),{code:'timeout'})); },120000);
+    function cleanup(){ clearTimeout(timer); delete window[cb]; sc.remove(); }
+    window[cb]=resp=>{
+      cleanup();
+      if(!resp||resp.status==='error'){ const d=(resp&&resp.errors&&resp.errors[0])||{}; reject(Object.assign(new Error(d.detailed_message||d.message||'Google returned an error'),{code:'google',reason:d.reason})); return; }
+      try{
+        const t=resp.table, cols=t.cols.map(c=>c.label||c.id);
+        const cell=(c,col)=>{ if(!c||c.v==null) return '';
+          if(col.type==='date'||col.type==='datetime'){ const m=String(c.v).match(/Date\((\d+),(\d+),(\d+)/); if(m) return `${m[1]}-${String(+m[2]+1).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`; }
+          return typeof c.v==='number' ? c.v : (c.f!=null?c.f:c.v); };
+        const rows=[cols].concat(t.rows.map(r=>r.c.map((c,i)=>cell(c,t.cols[i]))));
+        resolve(new Blob([Papa.unparse(rows)],{type:'text/csv'}));
+      }catch(err){ reject(Object.assign(err,{code:'parse'})); }
+    };
+    sc.onerror=()=>{ cleanup(); reject(Object.assign(new Error('blocked'),{code:'network'})); };
+    sc.src=`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json;responseHandler:${cb}&headers=1&sheet=${encodeURIComponent(tab)}&_=${Date.now()}`;
+    progress('download',null,'Downloading (backup method)…');
+    document.head.appendChild(sc);
+  });
+}
+async function loadFromSheet(){
+  let url;
+  try{ url=sheetCsvUrl(SHEET); }catch(err){ setSrcError(err.message); setStatus(''); showSourceError(err.message); openSidebarIfHidden(); return; }
+  setSrcError(''); setStatus('Loading…','busy');
+  if(IN_CLAUDE){
+    const msg='This copy is running inside claude.ai, which blocks all connections to Google Sheets, so it can’t load the sheet here. Open the dashboard from your hosted site (for example Netlify), or upload a CSV.';
+    setSrcError(msg); setStatus(''); showSourceError(msg); return;
+  }
+  startProgress('sheet',`Google Sheet · ${sheetTabLabel()}`);
+  progress('connect',0.3,'Connecting to Google Sheets…');
+  const {id,tab}=sheetParts(SHEET);
+  let blob=null, firstErr=null; const log=[];
+  const note=(method,e)=>log.push({method, code:e.code||'', status:e.status||'', msg:(e.name&&e.name!=='Error'?e.name+': ':'')+(e.message||String(e)), type:e.type||'', finalUrl:e.finalUrl||''});
+  try{ blob=await fetchSheetCsv(url); }
+  catch(e){ firstErr=e; note('1. CSV download',e); }
+  if(!blob && firstErr && firstErr.code!=='not_public' && id && tab){
+    try{ blob=await fetchSheetJsonp(id,tab); firstErr=null; }
+    catch(e2){ note('2. Backup (script) method',e2); if(e2.code==='google') firstErr=e2; }
+  }
+  window.__lastSheetLog=log;
+  if(!blob){
+    hideLoader();
+    const e=firstErr||{};
+    let msg;
+    if(e.code==='not_public' || e.reason==='access_denied' || e.status===401 || e.status===403)
+      msg='Google says this sheet isn’t public. In the sheet click Share → General access → “Anyone with the link” → Viewer, then try again.';
+    else if(e.code==='google')
+      msg=`Google Sheets returned an error: ${e.message}. Check that the tab name “${tab}” is spelled exactly as in the sheet (including capitals and spaces).`;
+    else if(e.code==='timeout')
+      msg='The sheet took more than 2 minutes to download. For very large tabs, use File → Share → Publish to web → CSV in Google Sheets and paste that link here instead.';
+    else if(e.status===404)
+      msg='Google couldn’t find this spreadsheet. Check the link.';
+    else
+      msg='Your browser couldn’t read the data from Google Sheets. This usually means a browser setting, extension or company network is blocking it. The most reliable fix is Google’s “Publish to web” CSV link (steps below).';
+    setSrcError(msg+' See the details on the page.'); setStatus(''); showSourceError(msg,{log,url});
+    return;
+  }
+  SOURCE={kind:'sheet',label:`Google Sheet · ${sheetTabLabel()}`,loadedAt:new Date()};
+  try{ localStorage.setItem('cpd-sheet',JSON.stringify(SHEET)); }catch(e){}
+  loadBlob(blob, SOURCE.label);
+}
+function openSidebarIfHidden(){
+  const sh=document.getElementById('shell');
+  if(matchMedia('(max-width:900px)').matches) sh.classList.add('mobile-open'); else sh.classList.remove('collapsed');
+}
+function showSourceError(msg,info){
+  const log=(info&&info.log)||[], url=info&&info.url;
+  const details = log.length ? `<details class="diag"><summary>Technical details (share this if it still fails)</summary>
+      <div class="diag-body">${log.map(l=>`<div><b>${esc(l.method)}</b>: ${esc(l.msg)}${l.status?` · HTTP ${esc(l.status)}`:''}${l.type?` · ${esc(l.type)}`:''}${l.finalUrl?`<br><span class="muted">ended at ${esc(l.finalUrl.slice(0,90))}</span>`:''}</div>`).join('')}
+      <div class="muted">Page opened from: ${esc(location.protocol==='file:'?'a file on this computer':location.host)} · Browser: ${esc(navigator.userAgent.replace(/^.*?\) /,'').slice(0,80))}</div></div></details>` : '';
+  const test = url ? `<a class="side-upload ghost2" href="${esc(url)}" target="_blank" rel="noopener">${icon('eye')}Open the data link</a>` : '';
+  const guide = `<div class="fix-guide"><div class="fg-t">Most reliable fix: use “Publish to web”</div>
+      <ol><li>In the Google Sheet: <b>File → Share → Publish to web</b>.</li>
+      <li>Under <b>Link</b>, choose the <b>dod</b> tab (not “Entire document”) and <b>Comma-separated values (.csv)</b>, then click <b>Publish</b>.</li>
+      <li>Copy the link it gives you (it ends with <code>output=csv</code>) and paste it into <b>Google Sheet link</b> in the left menu. You can leave the tab name as it is.</li>
+      <li>Click <b>Load data</b>. The published link updates automatically when the sheet changes (Google refreshes it about every 5 minutes).</li></ol>
+      <div class="muted">“Open the data link” is a quick test: if it downloads or shows the data, Google is sharing it and only the browser is blocking the page.</div></div>`;
+  const box=`<div class="empty"><div class="big-ic">${icon('file')}</div><h3>Couldn’t load the Google Sheet</h3><div style="max-width:560px;margin:0 auto">${esc(msg)}</div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="side-upload" onclick="loadFromSheet()">${icon('reset')}Try again</button>${test}<button class="side-upload ghost2" onclick="document.getElementById('fileInput').click()">${icon('upload')}Upload CSV</button></div>
+    ${info?guide:''}${details}</div>`;
+  if(!RAW.length){ document.getElementById('overviewTable').innerHTML=box; document.getElementById('campaignTable').innerHTML=box; }
+  else showFatal(msg);
+  document.getElementById('fileName').textContent=RAW.length?SOURCE.label:'No data loaded';
+  document.getElementById('fileSub').textContent=RAW.length?'Refresh failed · showing previous data':'Google Sheet not reachable';
+}
+
+// Parse dates once the whole file is known, so 05/09 vs 09/05 is decided from the data:
+// if any value has a first part above 12 it's day-first; if a second part is above 12 it's month-first.
+function resolveDates(rawSet){
+  let dmy=0, mdy=0;
+  for(const v of rawSet){ const m=String(v).trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/); if(!m) continue; if(+m[1]>12) dmy++; else if(+m[2]>12) mdy++; }
+  const monthFirst = mdy>dmy;
+  const out=new Map();
+  for(const v of rawSet){
+    const t=String(v).trim(); let d=null;
+    const m=t.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+    if(m){ let a=+m[1], b=+m[2], y=m[3]; if(y.length===2) y='20'+y; const [dd,mm]=monthFirst?[b,a]:[a,b]; const x=new Date(+y,mm-1,dd); d=isNaN(x)?null:x; }
+    else d=parseDate(t);
+    out.set(v, d?d.getTime():null);
+  }
+  return out;
+}
+
+function loadBlob(f, name){
+  FILE_NAME = name;
+  const sizeMB=(f.size/1048576).toFixed(1);
+  if(PROG.mode!=='sheet' || !document.getElementById('loader').classList.contains('show')) startProgress('file',FILE_NAME);
+  progress('read',0,`0 of ${sizeMB} MB`);
+  // Stream in chunks. Rows with the same date, week, channel, campaign and ad group
+  // are merged as they arrive, so memory and later work stay small.
+  let idx=null, rowCount=0, skipped=0, badHeader=false;
+  const groups=new Map(), rawDates=new Set();
   Papa.LocalChunkSize = 2*1024*1024;
   Papa.parse(f,{
     header:false, skipEmptyLines:true,
-    chunk:(res)=>{
+    chunk:(res,parser)=>{
+      if(badHeader) return;
       let rows=res.data, start=0;
       if(!idx){
         const header=rows[0]||[]; start=1;
@@ -509,21 +776,30 @@ document.getElementById('fileInput').addEventListener('change',e=>{
         const hmap={}; header.forEach((h,i)=>{ const n=norm(h); if(!(n in hmap)) hmap[n]=i; });
         idx={}; Object.entries(FIELD_KEYS).forEach(([k,c])=>{ const hit=c.find(x=>x in hmap); idx[k]=hit===undefined?-1:hmap[hit]; });
         HAS_ADGROUP = idx.adgroup>=0;
+        if(idx.Spend<0 && idx.campaign<0 && idx.Clicks<0){
+          parser.abort(); badHeader=true;
+          const found=header.filter(Boolean).slice(0,6).join(', ');
+          hideLoader();
+          const msg=`This data doesn’t look like campaign data: no Spend/Cost, Campaign or Clicks column was found${found?` (first columns: ${found})`:''}. Check the tab name and that row 1 holds the headers.`;
+          setSrcError(msg); setStatus(''); showSourceError(msg); return;
+        }
       }
-      const gi=k=>idx[k];
-      const iDate=gi('date'),iWeek=gi('week'),iCh=gi('channel'),iCamp=gi('campaign'),iAg=gi('adgroup');
+      const iDate=idx.date,iWeek=idx.week,iCh=idx.channel,iCamp=idx.campaign,iAg=idx.adgroup;
       const numIdx=NUM_FIELDS.map(k=>idx[k]);
       for(let r=start;r<rows.length;r++){
         const row=rows[r];
-        const dk = iDate>=0 ? dayOf(row[iDate]) : null;
+        const dRaw = iDate>=0 ? String(row[iDate]??'').trim() : '';
         const weekRaw = iWeek>=0 ? String(row[iWeek]??'').trim() : '';
         const channel = (iCh>=0 ? String(row[iCh]??'').trim() : '') || 'Unknown';
         const campaign = (iCamp>=0 ? String(row[iCamp]??'').trim() : '') || 'Unassigned';
+        // Skip summary rows a sheet may contain ("Grand Total", "39 Total")
+        if(/^grand total$/i.test(channel)||/^grand total$/i.test(campaign)||/\btotal$/i.test(weekRaw)){ skipped++; continue; }
         const adgroup = (iAg>=0 ? String(row[iAg]??'').trim() : '') || 'Unassigned';
-        const key = dk+'\u0001'+weekRaw+'\u0001'+channel+'\u0001'+campaign+'\u0001'+adgroup;
+        if(dRaw) rawDates.add(dRaw);
+        const key = dRaw+'\u0001'+weekRaw+'\u0001'+channel+'\u0001'+campaign+'\u0001'+adgroup;
         let g=groups.get(key);
         if(!g){
-          g={dk,weekRaw,channel,campaign,adgroup,ck:campaign+'|||'+channel,agk:campaign+'\u0001'+adgroup};
+          g={dRaw,weekRaw,channel,campaign,adgroup,ck:campaign+'|||'+channel,agk:campaign+'\u0001'+adgroup};
           for(const k of NUM_FIELDS) g[k]=0;
           groups.set(key,g);
         }
@@ -531,15 +807,18 @@ document.getElementById('fileInput').addEventListener('change',e=>{
         rowCount++;
       }
       const done=Math.min(1,(res.meta.cursor||0)/f.size);
-      showLoader('Reading '+FILE_NAME, `${(done*f.size/1048576).toFixed(1)} of ${sizeMB} MB \u00b7 ${rowCount.toLocaleString('en-IN')} rows`, done);
+      progress('read', done, `${rowCount.toLocaleString('en-IN')} rows read`);
     },
     complete:()=>{
-      showLoader('Building dashboard\u2026', `${rowCount.toLocaleString('en-IN')} rows`, 1);
+      if(badHeader) return;
+      progress('build', 0.3, `Building tables from ${rowCount.toLocaleString('en-IN')} rows…`);
       setTimeout(()=>{
-        const dateObjs=new Map();
+        if(!rowCount){ hideLoader(); showSourceError('No data rows were found. Check that the first row holds the column headers.'); return; }
+        const dk=resolveDates(rawDates), dateObjs=new Map();
         RAW=[...groups.values()];
         MIN_DK=null; MAX_DK=null;
         for(const r of RAW){
+          r.dk = r.dRaw ? dk.get(r.dRaw) : null; delete r.dRaw;
           if(r.dk!=null){
             let d=dateObjs.get(r.dk); if(!d){ const dt=new Date(r.dk); d={date:dt,day:dayLabel(r.dk),dow:(dt.getDay()+6)%7}; dateObjs.set(r.dk,d); }
             r.date=d.date; r.day=d.day; r.dow=d.dow;
@@ -550,31 +829,35 @@ document.getElementById('fileInput').addEventListener('change',e=>{
         assignWeekNumbers();
         ALL_CHANNELS=[...new Set(RAW.map(r=>r.channel))];
         ALL_WEEKS=[...new Set(RAW.map(r=>r.weekNum))].filter(n=>n!=null).sort((a,b)=>a-b);
-        state.channels=new Set(ALL_CHANNELS);
         ALL_YEARS=[...new Set(RAW.map(r=>r.year))].sort((a,b)=>(a==='Unknown')-(b==='Unknown')||a-b);
-        state.years=new Set(ALL_YEARS);
-        state.weeks=new Set(ALL_WEEKS);
         buildCampaignIndex();
-        resetFilters(false);
-        expanded.clear(); showAllCamps=false;
+        // Keep the viewer's filters on a refresh if the data still has those values
+        keepOrResetFilters();
+        showAllCamps=false;
         onDataLoaded();
         hideLoader();
+        if(SOURCE.kind==='sheet') setStatus(`✓ Loaded ${rowCount.toLocaleString('en-IN')} rows at ${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}`,'ok'); else setStatus('');
       },30);
     },
-    error:err=>{ hideLoader(); alert('Could not read the file: '+(err&&err.message||err)); }
+    error:err=>{ hideLoader(); alert('Could not read the data: '+(err&&err.message||err)); }
   });
-});
+}
 
 function activeSrcFields(){ return SRC_MAP[state.source]; }
 const GEN_KEYS=['Lead','OB','Payment','FOD','Spillover'];
 let _addFor=null, _addFn=null;
+// Plain functions (no runtime-generated code), so strict page security settings allow them
+const addBase=(a,r)=>{ a.Spend+=r.Spend; a.Impr+=r.Impr; a.Clicks+=r.Clicks; a.Installs+=r.Installs;
+  a.F_Lead+=r.F_CC; a.F_OB_base+=r.F_OB; a.F_FOD_base+=r.F_FOD; a.F_Payment+=r.F_pay; };
+const ADDERS={
+  Frontend:(a,r)=>{ addBase(a,r); a.Lead+=r.F_CC; a.OB+=r.F_OB; a.Payment+=r.F_pay; a.FOD+=r.F_FOD; a.AppActivation+=r['FE App Activation']; a.PurchaseFL+=r['FE Purchase']; return a; },
+  Backend:(a,r)=>{ addBase(a,r); a.Lead+=r.B_Leads; a.OB+=r.B_OB; a.Payment+=r.B_Payment; a.FOD+=r.B_FOD; a.Spillover+=r['Spillover FOD']; return a; },
+  AppsFlyer:(a,r)=>{ addBase(a,r); a.Lead+=r['AF Leads']; a.OB+=r['AF OB']; a.Payment+=r['AF Paid']; a.FOD+=r['AF FOD']; return a; }
+};
 function compiledAdd(){
   if(_addFor===state.source) return _addFn;
   const src=activeSrcFields();
-  let body='a.Spend+=r.Spend;a.Impr+=r.Impr;a.Clicks+=r.Clicks;a.Installs+=r.Installs;'
-    +'a.F_Lead+=r.F_CC;a.F_OB_base+=r.F_OB;a.F_FOD_base+=r.F_FOD;a.F_Payment+=r.F_pay;';
-  for(const f of src) body+=`a[${JSON.stringify(f.gk)}]+=r[${JSON.stringify(f.csv)}];`;
-  _addFn=new Function('a','r',body+'return a;'); _addFor=state.source;
+  _addFn=ADDERS[state.source]||ADDERS.Frontend; _addFor=state.source;
   return _addFn;
 }
 function newAgg(){
@@ -585,6 +868,17 @@ function aggRows(rows){ const a=newAgg(), add=compiledAdd(); for(let i=0;i<rows.
 function sumInto(acc,row){ if(!('F_Lead' in acc)) Object.assign(acc,newAgg()); return addRow(acc,row); }
 
 
+
+/* =================== Error safety net =================== */
+window.addEventListener('error',e=>showFatal(e.message||String(e.error||'Unknown error')));
+window.addEventListener('unhandledrejection',e=>showFatal((e.reason&&e.reason.message)||String(e.reason)));
+function showFatal(msg){
+  if(/ResizeObserver loop/i.test(msg)) return;
+  try{ hideLoader(); }catch(_){}
+  let el=document.getElementById('fatal');
+  if(!el){ el=document.createElement('div'); el.id='fatal'; el.style.cssText='position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:200;max-width:min(640px,92vw);background:#b42318;color:#fff;border-radius:10px;padding:12px 16px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.3)'; document.body.appendChild(el); }
+  el.innerHTML='<b>Something went wrong:</b> '+String(msg).replace(/</g,'&lt;')+' <button style="margin-left:10px;background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:6px;padding:3px 9px;cursor:pointer" onclick="this.parentNode.remove()">Dismiss</button>';
+}
 
 /* =================== Icons =================== */
 const ICON_PATHS={
@@ -856,6 +1150,27 @@ function updateButtons(){
     sum.textContent='· '+bits.join(' · ');
   } else sum.textContent='';
 }
+let _prevFilterState=null;
+function keepOrResetFilters(){
+  const prev=_prevFilterState; resetFilters(false);
+  if(!prev) return;
+  const keep=(all,sel)=>{ const s=new Set([...all].filter(v=>sel.has(v))); return s.size?s:null; };
+  // Only narrow when something was actually filtered before
+  const wasAll=(k,total)=>prev[k].size>=total;
+  if(!wasAll('channels',prev.nCh)){ const k=keep(ALL_CHANNELS,prev.channels); if(k) state.channels=k; }
+  if(!wasAll('campaigns',prev.nCamp)){ const k=keep(ALL_CAMPAIGNS.map(c=>c.name),prev.campaigns); if(k) state.campaigns=k; }
+  if(!wasAll('days',7)){ state.days=new Set(prev.days); }
+  state.dateFrom=prev.dateFrom; state.dateTo=prev.dateTo; state.compare=prev.compare;
+  document.getElementById('dateFrom').value=state.dateFrom?toInputDate(state.dateFrom):'';
+  document.getElementById('dateTo').value=state.dateTo?toInputDate(state.dateTo):'';
+  updateButtons();
+  _prevFilterState=null;
+}
+function rememberFilters(){
+  if(!RAW.length){ _prevFilterState=null; return; }
+  _prevFilterState={channels:new Set(state.channels),nCh:ALL_CHANNELS.length,campaigns:new Set(state.campaigns),nCamp:ALL_CAMPAIGNS.length,
+    days:new Set(state.days),dateFrom:state.dateFrom,dateTo:state.dateTo,compare:state.compare};
+}
 function resetFilters(doRender=true){
   state.channels=new Set(ALL_CHANNELS); state.years=new Set(ALL_YEARS); state.weeks=new Set(ALL_WEEKS);
   state.days=new Set([0,1,2,3,4,5,6]);
@@ -934,7 +1249,8 @@ function renderMeta(){
   const fd=t=>new Date(t).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
   document.getElementById('fileName').textContent=FILE_NAME||'Uploaded file';
   document.getElementById('fileName').title=FILE_NAME;
-  document.getElementById('fileSub').textContent=`${SRC_ROWS.toLocaleString('en-IN')} rows`+(MIN_DK!=null?` · ${fd(MIN_DK)} – ${fd(MAX_DK)}`:'');
+  const when=SOURCE.loadedAt?` · updated ${SOURCE.loadedAt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}`:'';
+  document.getElementById('fileSub').textContent=`${SRC_ROWS.toLocaleString('en-IN')} rows`+(MIN_DK!=null?` · ${fd(MIN_DK)} – ${fd(MAX_DK)}`:'')+when;
 }
 
 /* ---- KPI cards with sparklines ---- */
@@ -1189,12 +1505,32 @@ function agRowsHtml(c,i){
   return c.ags.map(a=>`<tr class="ag-row" data-parent="${i}"><td>${esc(a.ag)}</td><td></td>${metricCells(a,c)}</tr>`).join('');
 }
 
+document.getElementById('refreshBtn').onclick=()=>{ rememberFilters(); loadFromSheet(); };
 /* =================== Initial empty state =================== */
 (function(){
-  const msg=`<div class="empty"><div class="big-ic">${icon('upload')}</div><h3>Upload a CSV to get started</h3><div>Spend, funnel and efficiency metrics by campaign and ad group.</div><button class="side-upload" onclick="document.getElementById('fileInput').click()">${icon('upload')}Upload CSV</button></div>`;
+  const msg=`<div class="empty"><div class="big-ic">${icon('upload')}</div><h3>Load your data</h3><div>Paste a Google Sheet link and tab name in the left menu, or upload a CSV.</div><button class="side-upload" onclick="document.getElementById('fileInput').click()">${icon('upload')}Upload CSV</button></div>`;
   document.getElementById('overviewTable').innerHTML=msg;
   document.getElementById('campaignTable').innerHTML=msg;
   updateButtons();
+  const u=document.getElementById('sheetUrl'), t=document.getElementById('sheetTab');
+  u.value=SHEET.url||''; t.value=SHEET.tab||'';
+  const go=()=>{ SHEET={url:u.value.trim(),tab:t.value.trim()}; rememberFilters(); loadFromSheet(); document.getElementById('shell').classList.remove('mobile-open'); };
+  document.getElementById('loadSheetBtn').onclick=go;
+  [u,t].forEach(el=>el.addEventListener('keydown',e=>{ if(e.key==='Enter') go(); }));
+  document.getElementById('copyLinkBtn').onclick=async()=>{
+    const link=location.origin+location.pathname+'?sheet='+encodeURIComponent(u.value.trim())+'&tab='+encodeURIComponent(t.value.trim());
+    const b=document.getElementById('copyLinkBtn');
+    try{ await navigator.clipboard.writeText(link); b.textContent='Link copied ✓'; }catch(e){ prompt('Copy this link:',link); }
+    setTimeout(()=>b.textContent='Copy link with this sheet',2000);
+  };
+  if(SHEET.url){
+    document.getElementById('fileName').textContent='Google Sheet · '+sheetTabLabel();
+    document.getElementById('fileSub').textContent='Loading…';
+    loadFromSheet();
+  } else {
+    document.getElementById('fileName').textContent='No data loaded';
+    document.getElementById('fileSub').textContent='Add a Google Sheet link in the menu';
+  }
 })();
 
 </script>
