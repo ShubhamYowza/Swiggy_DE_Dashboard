@@ -56,11 +56,19 @@ button{font:inherit}
 .side-upload{margin:6px 22px 0;width:calc(100% - 44px);display:flex;align-items:center;justify-content:center;gap:8px;background:var(--primary);color:#fff;border:none;border-radius:8px;height:38px;cursor:pointer;font-weight:600;font-size:13.5px}
 .side-upload:hover{filter:brightness(1.08)}
 .src-box{padding:0 20px}
+.seg{display:inline-flex;background:var(--panel);border:1px solid var(--line2);border-radius:9px;padding:3px;gap:2px;margin-left:4px}
+.seg button{border:none;background:transparent;color:var(--sub);font-weight:650;font-size:13px;padding:0 14px;height:30px;border-radius:7px;cursor:pointer;min-width:52px}
+.seg button:hover{color:var(--ink);background:var(--hover)}
+.seg button.on{background:var(--primary);color:#fff;box-shadow:0 2px 6px color-mix(in srgb,var(--primary) 40%,transparent)}
+.seg-side{display:flex;width:100%;background:var(--side2);border-color:var(--side-line);margin:2px 0 0}
+.seg-side button{flex:1;color:var(--side-ink)} .seg-side button:hover{background:var(--side);color:#fff}
+.src-or{font-size:11px;color:var(--side-dim);margin:10px 0 0}
+@media (max-width:700px){.seg button{padding:0 9px;min-width:0}}
 .src-l{display:block;font-size:11px;font-weight:650;color:var(--side-dim);margin:8px 0 5px;letter-spacing:.02em}
 .src-in{width:100%;height:36px;border-radius:8px;border:1px solid var(--side-line);background:var(--side2);color:#fff;padding:0 10px;font:inherit;font-size:12.5px;outline:none}
 .src-in:focus{border-color:var(--primary)}
 .src-in::placeholder{color:var(--side-dim)}
-.src-err{font-size:11.5px;color:#ff9b8a;margin-top:6px;line-height:1.35;display:none}
+.src-err{font-size:11.5px;color:#ff9b8a;margin-top:10px;line-height:1.35;display:none}
 .src-err.show{display:block}
 .src-status{font-size:11.5px;color:var(--side-dim);margin-top:6px}
 .src-status.ok{color:#6fd3a8} .src-status.busy{color:#9db8ff}
@@ -305,23 +313,24 @@ td.metric .mk{font-size:10.5px;color:var(--faint);font-weight:500;margin-left:6p
     <div class="nav-item tab" data-tab="campaign"><span data-icon="layers"></span>Campaign view</div>
     <div class="nav-cap">Data source</div>
     <div class="src-box">
-      <label class="src-l" for="sheetUrl">Google Sheet link</label>
-      <input class="src-in" id="sheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off" spellcheck="false">
-      <label class="src-l" for="sheetTab">Sheet (tab) name</label>
-      <input class="src-in" id="sheetTab" type="text" placeholder="e.g. dod" autocomplete="off" spellcheck="false">
+      <div class="seg seg-side" id="presetSegSide" role="group" aria-label="Data set"><button data-p="SF">SF</button><button data-p="IM">IM</button><button data-p="Choice">Choice</button></div>
       <div class="src-err" id="srcErr"></div>
-      <div class="src-status" id="srcStatus"></div>
-      <button class="side-upload" id="loadSheetBtn" style="margin:10px 0 0;width:100%"><span data-icon="reset"></span>Load data</button>
-      <button class="src-link" id="copyLinkBtn" title="Copy a dashboard link that opens with this sheet and tab">Copy link with this sheet</button>
+      <!-- link/tab fields are hidden: the SF / IM / Choice buttons fill them in -->
+      <div hidden>
+        <input id="sheetUrl" type="url"><input id="sheetTab" type="text">
+        <div id="srcStatus"></div>
+        <button id="loadSheetBtn"></button><button id="copyLinkBtn"></button>
+      </div>
     </div>
     <div class="side-or"><span>or</span></div>
     <button class="side-upload ghost" id="uploadBtn"><span data-icon="upload"></span>Upload CSV</button>
-    <div class="side-hint">The sheet must be shared as “Anyone with the link can view”. Your link and tab are remembered on this device.</div>
+    <div class="side-hint">Pick a data set above. Your choice is remembered on this device.</div>
   </aside>
 
   <div class="main">
     <div class="topbar">
       <button class="icon-btn" id="menuBtn" title="Toggle sidebar"><span data-icon="menu"></span></button>
+      <div class="seg" id="presetSeg" role="group" aria-label="Data set"><button data-p="SF">SF</button><button data-p="IM">IM</button><button data-p="Choice">Choice</button></div>
       <div class="top-spacer"></div>
       <div class="top-file" id="topFile"><span data-icon="file"></span><div style="min-width:0"><div class="tf-name" id="fileName">No file loaded</div><div class="tf-sub" id="fileSub">Upload a CSV to begin</div></div></div>
       <div class="top-spacer"></div>
@@ -522,10 +531,10 @@ const FIELD_KEYS={
   date:['date','day','reportingstarts'], week:['week','weeknum','weekno','weeknumber'],
   channel:['channel','platform'], campaign:['campaign','campaignname'],
   adgroup:['adgroup','adgroupname','adgroups','adset','adsetname','adsets'],
-  Spend:['spend','cost','amountspent','amountspentinr'], Impr:['impr','impressions','impression'],
+  Spend:['spend','spends','cost','amountspent','amountspentinr'], Impr:['impr','impressions','impression'],
   Clicks:['clicks','click'], Installs:['installs','install'],
-  F_CC:['fcc','flead','fleads'], F_OB:['fob'], F_pay:['fpay','fpayment','fpaid'], F_FOD:['ffod'],
-  B_FOD:['bfod'], B_Leads:['bleads','blead'], B_OB:['bob'], B_Payment:['bpayment','bpay','bpaid'],
+  F_CC:['fcc','flead','fleads','frontendadsleads'], F_OB:['fob','frontendonboardings'], F_pay:['fpay','fpayment','fpaid','frontendpayment'], F_FOD:['ffod'],
+  B_FOD:['bfod'], B_Leads:['bleads','blead','crmleads'], B_OB:['bob','crmonboardings'], B_Payment:['bpayment','bpay','bpaid','crmpayments'],
   'Spillover FOD':['spilloverfod'],
   'AF FOD':['affod'], 'AF Leads':['afleads','aflead'], 'AF OB':['afob'], 'AF Paid':['afpaid','afpayment','afpay'],
   'FE App Activation':['feappactivation','fappactivation','frontendappactivation','appactivation'],
@@ -574,12 +583,27 @@ document.getElementById('uploadBtn').onclick=()=>document.getElementById('fileIn
 /* =================== Data source =================== */
 // The dashboard reads this Google Sheet tab on open. The sheet must be shared as
 // "Anyone with the link can view" (or published to the web).
-const DEFAULT_SHEET = {url:'https://docs.google.com/spreadsheets/d/1-fTLvMdfDRNHngazg74NxkuZdNONC25fRFt7vVTSJRQ/edit', tab:'dod'};
-// Priority: link parameters (?sheet=…&tab=…) > what this device used last > the default above
+// One-click data sets (buttons in the top bar and the left menu)
+const PRESETS = {
+  // gid = the tab's ID (the number after gid= when that tab is open). With a gid the whole tab
+  // is downloaded as CSV, exactly like File → Download → CSV (all rows, filters ignored).
+  SF:     {url:'https://docs.google.com/spreadsheets/d/1AJ5I2c6ZvrdKRTiJw30_xwgfVAAfOxUG0x1lhGIcuXI/edit', tab:'Raw', gid:''},
+  IM:     {url:'https://docs.google.com/spreadsheets/d/1-fTLvMdfDRNHngazg74NxkuZdNONC25fRFt7vVTSJRQ/edit', tab:'dod', gid:'306066602'},
+  Choice: {url:'https://docs.google.com/spreadsheets/d/1Twamm7Q7SOlkQDIX2BAv46ookcYDtYILPoKe5OX0HCU/edit', tab:'dod', gid:'306066602'}
+};
+const DEFAULT_SHEET = {...PRESETS.IM, preset:'IM'};
+// Which preset (if any) a link + tab matches
+function presetOf(cfg){
+  const id=(String(cfg.url||'').match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]{20,})/)||[])[1];
+  for(const [k,p] of Object.entries(PRESETS)){ const pid=p.url.match(/\/d\/([a-zA-Z0-9_-]{20,})/)[1]; if(id===pid && String(cfg.tab||'').trim().toLowerCase()===p.tab.toLowerCase()) return k; }
+  return null;
+}
+// Priority: link parameters (?src=IM or ?sheet=…&tab=…) > what this device used last > the default above
 function initialSheetConfig(){
   const q=new URLSearchParams(location.search);
-  if(q.get('sheet')) return {url:q.get('sheet'), tab:q.get('tab')||''};
-  try{ const v=JSON.parse(localStorage.getItem('cpd-sheet')||'null'); if(v&&v.url) return v; }catch(e){}
+  const src=q.get('src'); if(src){ const k=Object.keys(PRESETS).find(x=>x.toLowerCase()===src.toLowerCase()); if(k) return {...PRESETS[k],preset:k}; }
+  if(q.get('sheet')){ const c={url:q.get('sheet'), tab:q.get('tab')||'', gid:q.get('gid')||''}; const k=presetOf(c); return k?{...PRESETS[k],preset:k}:c; }
+  try{ const v=JSON.parse(localStorage.getItem('cpd-sheet')||'null'); if(v&&v.url){ const k=presetOf(v); return k?{...PRESETS[k],preset:k}:v; } }catch(e){}
   return {...DEFAULT_SHEET};
 }
 let SHEET=initialSheetConfig();
@@ -594,7 +618,12 @@ function sheetCsvUrl(cfg){
   if(!tab) throw new Error('Enter the sheet (tab) name, for example dod.');
   return `https://docs.google.com/spreadsheets/d/${m[1]}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(tab)}`;
 }
+function sheetExportUrl(cfg){
+  const {id}=sheetParts(cfg); const gid=String(cfg.gid||'').trim();
+  return id&&gid ? `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${encodeURIComponent(gid)}` : null;
+}
 function sheetTabLabel(){ return String(SHEET.tab||'').trim() || 'published CSV'; }
+function sourceLabel(){ return SHEET.preset ? `${SHEET.preset} · ${sheetTabLabel()}` : `Google Sheet · ${sheetTabLabel()}`; }
 let SOURCE = {kind:null, label:'', loadedAt:null};
 
 document.getElementById('fileInput').addEventListener('change',e=>{
@@ -680,16 +709,23 @@ async function loadFromSheet(){
     const msg='This copy is running inside claude.ai, which blocks all connections to Google Sheets, so it can’t load the sheet here. Open the dashboard from your hosted site (for example Netlify), or upload a CSV.';
     setSrcError(msg); setStatus(''); showSourceError(msg); return;
   }
-  startProgress('sheet',`Google Sheet · ${sheetTabLabel()}`);
+  startProgress('sheet',sourceLabel());
   progress('connect',0.3,'Connecting to Google Sheets…');
   const {id,tab}=sheetParts(SHEET);
-  let blob=null, firstErr=null; const log=[];
+  let blob=null, firstErr=null, method=''; const log=[];
   const note=(method,e)=>log.push({method, code:e.code||'', status:e.status||'', msg:(e.name&&e.name!=='Error'?e.name+': ':'')+(e.message||String(e)), type:e.type||'', finalUrl:e.finalUrl||''});
-  try{ blob=await fetchSheetCsv(url); }
-  catch(e){ firstErr=e; note('1. CSV download',e); }
+  const exportUrl=sheetExportUrl(SHEET);
+  if(exportUrl){
+    try{ blob=await fetchSheetCsv(exportUrl); method='export'; }
+    catch(e){ firstErr=e; note('1. Full tab export',e); }
+  }
+  if(!blob){
+    try{ blob=await fetchSheetCsv(url); method='query'; firstErr=null; }
+    catch(e){ if(!firstErr||firstErr.code==='network') firstErr=e; note((exportUrl?'2':'1')+'. CSV by tab name',e); }
+  }
   if(!blob && firstErr && firstErr.code!=='not_public' && id && tab){
-    try{ blob=await fetchSheetJsonp(id,tab); firstErr=null; }
-    catch(e2){ note('2. Backup (script) method',e2); if(e2.code==='google') firstErr=e2; }
+    try{ blob=await fetchSheetJsonp(id,tab); firstErr=null; method='query'; }
+    catch(e2){ note((exportUrl?'3':'2')+'. Backup (script) method',e2); if(e2.code==='google') firstErr=e2; }
   }
   window.__lastSheetLog=log;
   if(!blob){
@@ -709,7 +745,7 @@ async function loadFromSheet(){
     setSrcError(msg+' See the details on the page.'); setStatus(''); showSourceError(msg,{log,url});
     return;
   }
-  SOURCE={kind:'sheet',label:`Google Sheet · ${sheetTabLabel()}`,loadedAt:new Date()};
+  SOURCE={kind:'sheet',label:sourceLabel(),loadedAt:new Date(),method};
   try{ localStorage.setItem('cpd-sheet',JSON.stringify(SHEET)); }catch(e){}
   loadBlob(blob, SOURCE.label);
 }
@@ -1250,7 +1286,8 @@ function renderMeta(){
   document.getElementById('fileName').textContent=FILE_NAME||'Uploaded file';
   document.getElementById('fileName').title=FILE_NAME;
   const when=SOURCE.loadedAt?` · updated ${SOURCE.loadedAt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}`:'';
-  document.getElementById('fileSub').textContent=`${SRC_ROWS.toLocaleString('en-IN')} rows`+(MIN_DK!=null?` · ${fd(MIN_DK)} – ${fd(MAX_DK)}`:'')+when;
+  const how=SOURCE.kind==='sheet'?(SOURCE.method==='export'?' · full tab':' · via tab name'):'';
+  document.getElementById('fileSub').textContent=`${SRC_ROWS.toLocaleString('en-IN')} rows`+(MIN_DK!=null?` · ${fd(MIN_DK)} – ${fd(MAX_DK)}`:'')+when+how;
 }
 
 /* ---- KPI cards with sparklines ---- */
@@ -1508,23 +1545,36 @@ function agRowsHtml(c,i){
 document.getElementById('refreshBtn').onclick=()=>{ rememberFilters(); loadFromSheet(); };
 /* =================== Initial empty state =================== */
 (function(){
-  const msg=`<div class="empty"><div class="big-ic">${icon('upload')}</div><h3>Load your data</h3><div>Paste a Google Sheet link and tab name in the left menu, or upload a CSV.</div><button class="side-upload" onclick="document.getElementById('fileInput').click()">${icon('upload')}Upload CSV</button></div>`;
+  const msg=`<div class="empty"><div class="big-ic">${icon('upload')}</div><h3>Load your data</h3><div>Choose SF, IM or Choice at the top, or upload a CSV.</div><button class="side-upload" onclick="document.getElementById('fileInput').click()">${icon('upload')}Upload CSV</button></div>`;
   document.getElementById('overviewTable').innerHTML=msg;
   document.getElementById('campaignTable').innerHTML=msg;
   updateButtons();
   const u=document.getElementById('sheetUrl'), t=document.getElementById('sheetTab');
   u.value=SHEET.url||''; t.value=SHEET.tab||'';
-  const go=()=>{ SHEET={url:u.value.trim(),tab:t.value.trim()}; rememberFilters(); loadFromSheet(); document.getElementById('shell').classList.remove('mobile-open'); };
+  const markPreset=()=>document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.p===SHEET.preset));
+  window.markPreset=markPreset;
+  const go=()=>{ SHEET={url:u.value.trim(),tab:t.value.trim()}; const k=presetOf(SHEET); if(k) SHEET={...PRESETS[k],preset:k}; markPreset();
+    // same data set: keep filters; different one: start fresh
+    if(SOURCE.kind==='sheet' && SOURCE.label===sourceLabel()) rememberFilters();
+    loadFromSheet(); document.getElementById('shell').classList.remove('mobile-open'); };
+  document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.p; if(SHEET.preset===k && RAW.length && SOURCE.kind==='sheet') return;
+    u.value=PRESETS[k].url; t.value=PRESETS[k].tab; go();
+  });
+  markPreset();
+  // editing the fields by hand un-highlights the preset until loaded
+  [u,t].forEach(el=>el.addEventListener('input',()=>{ const k=presetOf({url:u.value,tab:t.value}); document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.p===k)); }));
   document.getElementById('loadSheetBtn').onclick=go;
   [u,t].forEach(el=>el.addEventListener('keydown',e=>{ if(e.key==='Enter') go(); }));
   document.getElementById('copyLinkBtn').onclick=async()=>{
-    const link=location.origin+location.pathname+'?sheet='+encodeURIComponent(u.value.trim())+'&tab='+encodeURIComponent(t.value.trim());
+    const k=presetOf({url:u.value,tab:t.value});
+    const link=location.origin+location.pathname+(k?'?src='+k:'?sheet='+encodeURIComponent(u.value.trim())+'&tab='+encodeURIComponent(t.value.trim()));
     const b=document.getElementById('copyLinkBtn');
     try{ await navigator.clipboard.writeText(link); b.textContent='Link copied ✓'; }catch(e){ prompt('Copy this link:',link); }
     setTimeout(()=>b.textContent='Copy link with this sheet',2000);
   };
   if(SHEET.url){
-    document.getElementById('fileName').textContent='Google Sheet · '+sheetTabLabel();
+    document.getElementById('fileName').textContent=sourceLabel();
     document.getElementById('fileSub').textContent='Loading…';
     loadFromSheet();
   } else {
