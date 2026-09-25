@@ -35,13 +35,15 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:13.5px;line-height:1.45;-webkit-font-smoothing:antialiased}
 svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 button{font:inherit}
 
 /* ---------- Shell ---------- */
 .shell{display:flex;min-height:100vh}
-.sidebar{width:252px;flex:none;background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:50;transition:margin-left .2s}
+.sidebar{width:252px;flex:none;background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;position:sticky;top:env(safe-area-inset-top,0px);height:100vh;z-index:50;transition:margin-left .2s}
 .shell.collapsed .sidebar{margin-left:-252px}
 .brand{display:flex;align-items:center;gap:11px;padding:20px 20px;font-size:15.5px;white-space:nowrap;font-weight:650;color:#fff;letter-spacing:-.01em}
 .brand-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#4680ff,#6f9bff);display:grid;place-items:center;color:#fff;box-shadow:0 4px 12px rgba(70,128,255,.35)}
@@ -59,11 +61,16 @@ button{font:inherit}
 .file-name{color:#fff;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
 .file-sub{font-size:11.5px;color:var(--side-dim)}
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
-.topbar{height:64px;display:flex;align-items:center;gap:10px;padding:0 clamp(14px,2.4vw,30px);background:var(--bg);position:sticky;top:0;z-index:40;border-bottom:1px solid transparent}
+.topbar{height:64px;display:flex;align-items:center;gap:10px;padding:0 clamp(14px,2.4vw,30px);background:var(--bg);position:sticky;top:env(safe-area-inset-top,0px);z-index:40;border-bottom:1px solid transparent}
 .icon-btn{width:38px;height:38px;border-radius:9px;border:none;background:transparent;color:var(--sub);display:grid;place-items:center;cursor:pointer}
 .icon-btn:hover{background:var(--hover);color:var(--ink)}
 .icon-btn svg.i{width:20px;height:20px}
 .top-spacer{flex:1}
+.top-file{display:flex;align-items:center;gap:10px;max-width:min(520px,50vw);padding:6px 14px;border-radius:10px;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);text-align:left}
+.top-file svg.i{color:var(--primary);width:20px;height:20px}
+.tf-name{font-weight:650;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tf-sub{font-size:11.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:700px){.top-file{max-width:48vw}.tf-sub{display:none}}
 .top-upload{display:flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);color:var(--ink);cursor:pointer;font-weight:550}
 .top-upload:hover{border-color:var(--primary);color:var(--primary)}
 .content{padding:6px clamp(14px,2.4vw,30px) 40px;max-width:1720px;width:100%}
@@ -80,7 +87,15 @@ button{font:inherit}
 .card-sub{font-size:12.5px;color:var(--sub)}
 
 /* ---------- Filters ---------- */
-.filters{margin-bottom:18px}
+.filters{margin-bottom:18px;position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:30;box-shadow:0 6px 18px rgba(27,46,94,.08)}
+.filters .card-head{padding:10px 18px}
+.filters .filter-grid{padding:12px 18px;gap:10px 12px}
+.filters.collapsed .filter-grid{display:none}
+.filters.collapsed .card-head{border-bottom:none}
+.fsum{font-size:12px;color:var(--sub);font-weight:450;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
+.fhead-actions{display:flex;gap:8px}
+#collapseBtn svg.i{transition:transform .15s}
+.filters.collapsed #collapseBtn svg.i{transform:rotate(-90deg)}
 .filter-grid{display:flex;flex-wrap:wrap;gap:12px 14px;align-items:flex-end;padding:14px 18px}
 .field{display:flex;flex-direction:column;gap:5px}
 .field > label{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;font-weight:650}
@@ -115,7 +130,7 @@ input[type=date]{font:inherit;color:var(--ink);background:var(--panel);border:1p
 
 /* ---------- KPI cards ---------- */
 .kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-bottom:18px}
-.kpi{border-radius:var(--radius);padding:20px 22px;color:#fff;position:relative;overflow:hidden;min-height:128px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:'l s' 'v s' 'd d';align-items:start;column-gap:10px}
+.kpi{border-radius:var(--radius);padding:20px 22px;color:#fff;position:relative;overflow:hidden;min-height:118px;display:flex;flex-direction:column;justify-content:center}
 .kpi .kpi-l{grid-area:l} .kpi .kpi-v{grid-area:v} .kpi .kpi-d{grid-area:d} .kpi .kpi-spark{grid-area:s;align-self:center}
 .kpi.blue{background:var(--primary)} .kpi.green{background:var(--success)} .kpi.orange{background:var(--warning)} .kpi.cyan{background:var(--info)}
 .kpi-l{font-size:14px;opacity:.95;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -137,7 +152,7 @@ input[type=date]{font:inherit;color:var(--ink);background:var(--panel);border:1p
 
 /* ---------- Tables ---------- */
 .panel{display:none} .panel.active{display:block}
-.table-scroll{overflow:auto;max-height:calc(100vh - 140px);min-height:200px}
+.table-scroll{overflow:auto;max-height:calc(100vh - 64px - var(--fh,0px) - 110px);min-height:260px}
 .table-scroll > .empty{border:none;margin:0}
 table{width:100%;border-collapse:separate;border-spacing:0}
 thead th{position:sticky;top:0;z-index:3;background:var(--panel2);text-align:right;padding:10px 12px;font-size:11px;font-weight:650;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line2);white-space:nowrap;vertical-align:bottom}
@@ -154,6 +169,20 @@ td.gs,th.gs{border-left:1px solid var(--line2)}
 td.neg{color:var(--neg)} td.pos{color:var(--pos)}
 tfoot td{position:sticky;bottom:0;z-index:2;background:var(--total);font-weight:700;padding:11px 12px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;border-top:2px solid var(--line2)}
 tfoot td:first-child{z-index:3}
+thead tr.tot-row td{position:sticky;z-index:2;background:var(--total);font-weight:700;padding:11px 12px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;border-bottom:2px solid var(--line2);font-size:13.5px;color:var(--ink)}
+thead tr.tot-row td:first-child{z-index:4;text-align:left}
+thead tr.tot-row td.chg{background:var(--total)}
+td.chg{font-size:12.5px;font-weight:600;background:var(--panel2);color:var(--sub)}
+tbody tr:hover td.chg{background:var(--hover)}
+td.chg.up{color:var(--pos)} td.chg.down{color:var(--neg)}
+.yr{display:inline-block;font-size:10.5px;font-weight:700;color:var(--primary);background:color-mix(in srgb,var(--primary) 12%,transparent);border-radius:4px;padding:1px 5px;margin-right:7px}
+td.period{font-weight:600;color:var(--ink)}
+tr.subtotal td{font-weight:650;background:var(--sub-row);border-bottom:2px solid var(--line2)}
+th.chg-h{color:var(--ink);text-align:right}
+td.share-c{color:var(--primary);font-weight:600}
+.camp-row td.share-c,.tot-row td.share-c{color:var(--sub);font-weight:500}
+th.share-h{color:var(--primary)}
+table.ov th.chg-h{border-left:1px solid var(--line2)} table.ov td.chg{border-left:1px solid var(--line2);min-width:110px}
 .muted{color:var(--faint);font-weight:500}
 .chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;color:#fff}
 .chip.google{background:var(--success)} .chip.meta{background:var(--primary)} .chip.other{background:#7a5af8}
@@ -234,15 +263,13 @@ td.metric .mk{font-size:10.5px;color:var(--faint);font-weight:500;margin-left:6p
     <div class="nav-cap">Data</div>
     <button class="side-upload" id="uploadBtn"><span data-icon="upload"></span>Upload CSV</button>
     <div class="side-hint">Large files are read in chunks, so the page stays responsive.</div>
-    <div class="side-foot">
-      <div class="file-badge"><span data-icon="file"></span></div>
-      <div style="min-width:0"><div class="file-name" id="fileName">No file loaded</div><div class="file-sub" id="fileSub">Upload a CSV to begin</div></div>
-    </div>
   </aside>
 
   <div class="main">
     <div class="topbar">
       <button class="icon-btn" id="menuBtn" title="Toggle sidebar"><span data-icon="menu"></span></button>
+      <div class="top-spacer"></div>
+      <div class="top-file" id="topFile"><span data-icon="file"></span><div style="min-width:0"><div class="tf-name" id="fileName">No file loaded</div><div class="tf-sub" id="fileSub">Upload a CSV to begin</div></div></div>
       <div class="top-spacer"></div>
       <button class="top-upload" id="uploadBtn2"><span data-icon="upload"></span>Upload CSV</button>
       <button class="icon-btn" id="themeBtn" title="Switch theme"></button>
@@ -256,8 +283,8 @@ td.metric .mk{font-size:10.5px;color:var(--faint);font-weight:500;margin-left:6p
 
       <div class="card filters" id="filterCard">
         <div class="card-head">
-          <div class="card-title"><span data-icon="filter"></span>Filters <span class="fcount" id="fcount" style="display:none"></span></div>
-          <button class="btn-ghost" id="resetBtn"><span data-icon="reset"></span>Reset filters</button>
+          <div class="card-title" style="min-width:0"><span data-icon="filter"></span>Filters <span class="fcount" id="fcount" style="display:none"></span><span class="fsum" id="fsum"></span></div>
+          <div class="fhead-actions"><button class="btn-ghost" id="resetBtn"><span data-icon="reset"></span>Reset filters</button><button class="btn-ghost" id="collapseBtn" title="Hide or show the filters"><span data-icon="chev"></span><span id="collapseTxt">Hide</span></button></div>
         </div>
         <div class="filter-grid">
           <div class="field"><label>Funnel source</label><div class="dd"><button class="dd-btn" id="sourceBtn"></button><div class="pop" id="sourcePop"></div></div></div>
@@ -276,15 +303,11 @@ td.metric .mk{font-size:10.5px;color:var(--faint);font-weight:500;margin-left:6p
         </div>
       </div>
 
-      <div id="kpiArea" style="display:none">
-        <div class="kpi-row" id="kpis"></div>
-        <div class="card stat-strip" id="stats"></div>
-      </div>
       <div class="card compare-banner" id="compareBanner" style="display:none"></div>
 
       <div class="panel active" id="panel-overview">
         <div class="card">
-          <div class="card-head"><div><div class="card-title"><span>Performance by <span id="ovGran">week</span></span></div><div class="card-sub" id="ovSub">Metrics in rows, periods side by side</div></div></div>
+          <div class="card-head"><div><div class="card-title"><span>Performance by <span id="ovGran">week</span></span></div><div class="card-sub" id="ovSub"></div></div><div class="scope" id="ovScope"></div></div>
           <div class="table-scroll" id="overviewTable"></div>
         </div>
       </div>
@@ -301,7 +324,7 @@ td.metric .mk{font-size:10.5px;color:var(--faint);font-weight:500;margin-left:6p
 
 <script>
 
-const BASE = [{k:'Spend',l:'Spend',fmt:'money'},{k:'Impr',l:'Impr.',fmt:'int'},{k:'Clicks',l:'Clicks',fmt:'int'},{k:'Installs',l:'Installs',fmt:'int'}];
+const BASE = [{k:'Spend',l:'Spend',fmt:'money'},{k:'SpendShare',l:'Spend share %',fmt:'pct',share:true},{k:'Impr',l:'Impr.',fmt:'int'},{k:'Clicks',l:'Clicks',fmt:'int'},{k:'Installs',l:'Installs',fmt:'int'}];
 const SRC_MAP = {
   Frontend:[{gk:'Lead',csv:'F_CC'},{gk:'OB',csv:'F_OB'},{gk:'Payment',csv:'F_pay'},{gk:'FOD',csv:'F_FOD'},{gk:'AppActivation',csv:'FE App Activation',l:'App Activation'},{gk:'PurchaseFL',csv:'FE Purchase',l:'Purchase (First Login)'}],
   Backend:[{gk:'Lead',csv:'B_Leads'},{gk:'OB',csv:'B_OB'},{gk:'Payment',csv:'B_Payment'},{gk:'FOD',csv:'B_FOD'},{gk:'Spillover',csv:'Spillover FOD'}],
@@ -354,7 +377,7 @@ let expanded = new Set();
 let showAllCamps = false;
 const CAMP_LIMIT = 200;
 let selectedMetrics = new Set(['Spend','Clicks','Installs','Lead','OB','FOD','CPL','CPOB']);
-let state = { source:'Frontend', gran:'week', channels:new Set(), years:new Set(), weeks:new Set(), days:new Set([0,1,2,3,4,5,6]), campaigns:new Set(), adgroups:new Set(), splitWeeks:true, dateFrom:null, dateTo:null, compare:'none', compareFrom:null, compareTo:null };
+let state = { source:'Frontend', gran:'week', channels:new Set(), years:new Set(), weeks:new Set(), days:new Set([0,1,2,3,4,5,6]), campaigns:new Set(), adgroups:new Set(), splitWeeks:true, ovSplit:true, dateFrom:null, dateTo:null, compare:'none', compareFrom:null, compareTo:null };
 function stripTime(d){ return d? new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime() : null; }
 function toInputDate(d){ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
 
@@ -622,12 +645,13 @@ document.querySelectorAll('.nav-item.tab').forEach(t=>t.onclick=()=>{
 /* =================== Metric definitions =================== */
 function activeColumns(){
   const cols=[];
-  BASE.forEach(m=>{ if(selectedMetrics.has(m.k)) cols.push({k:m.k,l:m.l,fmt:m.fmt}); });
+  BASE.forEach(m=>{ if(selectedMetrics.has(m.k)) cols.push({k:m.k,l:m.l,fmt:m.fmt,share:!!m.share}); });
   activeSrcFields().forEach(f=>{ if(selectedMetrics.has(f.gk)) cols.push({k:f.gk,l:f.l||f.gk,fmt:'int'}); });
   CALC.forEach(m=>{ if(selectedMetrics.has(m.k)) cols.push({k:m.k,l:m.l,fmt:m.fmt,calc:m.fn}); });
   return cols;
 }
 function colValue(agg,c){
+  if(c.share) return null;   // needs a parent row; computed by the table renderers
   if(/Drop$/.test(c.k) && state.source==='Frontend') return null;
   let v = c.calc ? c.calc(agg) : (agg[c.k] ?? 0);
   if((v===null||v===undefined||isNaN(v)) && ZERO_IF_MISSING.has(c.k)) v=0;
@@ -822,6 +846,15 @@ function updateButtons(){
   });
   const active=['channel','campaign','adgroup','year','week','day'].filter(id=>DD[id].cfg.btnText()[1]).length+(state.dateFrom||state.dateTo?1:0);
   const fc=document.getElementById('fcount'); fc.style.display=active?'inline-block':'none'; fc.textContent=active+' active';
+  // Short summary shown next to the title when the filters are collapsed
+  const sum=document.getElementById('fsum');
+  if(document.getElementById('filterCard').classList.contains('collapsed') && RAW.length){
+    const bits=[state.source];
+    const NAMES={channel:'Channel',campaign:'Campaign',adgroup:'Ad group',year:'Year',week:'Week',day:'Days'};
+    Object.keys(NAMES).forEach(id=>{ const [t,f]=DD[id].cfg.btnText(); if(f) bits.push(NAMES[id]+': '+t); });
+    if(state.dateFrom||state.dateTo) bits.push('custom dates');
+    sum.textContent='· '+bits.join(' · ');
+  } else sum.textContent='';
 }
 function resetFilters(doRender=true){
   state.channels=new Set(ALL_CHANNELS); state.years=new Set(ALL_YEARS); state.weeks=new Set(ALL_WEEKS);
@@ -833,6 +866,14 @@ function resetFilters(doRender=true){
   updateButtons(); if(doRender) render();
 }
 document.getElementById('resetBtn').onclick=()=>resetFilters(true);
+
+document.getElementById('collapseBtn').onclick=()=>{
+  const fc=document.getElementById('filterCard'), c=fc.classList.toggle('collapsed');
+  document.getElementById('collapseTxt').textContent=c?'Show':'Hide';
+  closeAllPops(); updateButtons();
+};
+// Tables size themselves to the space left under the frozen filter card
+new ResizeObserver(()=>{ document.documentElement.style.setProperty('--fh',document.getElementById('filterCard').offsetHeight+'px'); }).observe(document.getElementById('filterCard'));
 
 /* =================== Filtering =================== */
 let _fd=null, _cmp;
@@ -879,12 +920,11 @@ function computeComparisonRaw(){
 function render(){
   if(!RAW.length) return;
   _fd=null; _cmp=undefined;
-  renderMeta(); renderKpis(); renderCompareBanner();
+  renderMeta(); renderCompareBanner();
   const tab=document.querySelector('.nav-item.tab.active').dataset.tab;
   if(tab==='overview') renderOverview(); else renderCampaign();
 }
 function onDataLoaded(){
-  document.getElementById('kpiArea').style.display='block';
   updateButtons(); render();
 }
 function emptyState(msg){
@@ -937,7 +977,7 @@ function renderKpis(){
       const a=vals[vals.length-1], b=vals[vals.length-2];
       if(b){ const d=(a-b)/b*100; delta=`<div class="kpi-d">${icon(d>=0?'up':'down')}${d>=0?'+':''}${d.toFixed(1)}% vs ${unit}</div>`; }
     }
-    return `<div class="kpi ${c.c}"><div class="kpi-l">${c.l}</div><div class="kpi-v">${fmt(total[c.k]||0,c.f)}</div>${delta}<div class="kpi-spark">${sparkSvg(vals,c.t)}</div></div>`;
+    return `<div class="kpi ${c.c}"><div class="kpi-l">${c.l}</div><div class="kpi-v">${fmt(total[c.k]||0,c.f)}</div>${delta}</div>`;
   }).join('');
   const stats=[
     {l:'Impressions',v:fmt(total.Impr,'int'),ic:'eye',c:'blue'},
@@ -959,7 +999,7 @@ function renderCompareBanner(){
   const cols=activeColumns();
   const fd=d=>d.toLocaleDateString('en-IN',{month:'short',day:'numeric',year:'numeric'});
   let html=`<div class="compare-head">${fd(c.curFrom)} – ${fd(c.curTo)} vs ${fd(c.cmpFrom)} – ${fd(c.cmpTo)}</div><div class="compare-grid">`;
-  cols.forEach(col=>{
+  cols.filter(c=>!c.share).forEach(col=>{
     const curVal=colValue(c.curAgg,col), cmpVal=colValue(c.cmpAgg,col);
     let deltaStr='—', cls='';
     if(cmpVal!=null && cmpVal!==0 && curVal!=null && !isNaN(curVal)){ const d=(curVal-cmpVal)/Math.abs(cmpVal)*100; deltaStr=(d>=0?'+':'')+d.toFixed(1)+'%'; cls=d>=0?'up':'down'; }
@@ -976,40 +1016,74 @@ function periodHead(p){
   const d=new Date(p.id);
   return `<th class="ph"><div class="ph-y">${d.getFullYear()}</div><div class="ph-w">${d.toLocaleDateString('en-IN',{weekday:'short'})}</div><div class="ph-d">${d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div></th>`;
 }
+function periodName(id){ return state.gran==='week' ? WEEK_NAME[id].replace(/^Week\s*/i,'W') : new Date(id).toLocaleDateString('en-IN',{day:'numeric',month:'short'}); }
+function periodSub(id){ return state.gran==='week' ? String(WEEK_YEAR[id]) : new Date(id).toLocaleDateString('en-IN',{weekday:'short'}); }
+function periodTitle(id){ return state.gran==='week' ? WEEK_LABELS[id] : dayLabel(id); }
 function renderOverview(){
   const cols=activeColumns(), data=filteredData(), el=document.getElementById('overviewTable');
-  document.getElementById('ovGran').textContent=state.gran==='week'?'week':'day';
-  if(!cols.length){ el.innerHTML=emptyState('No metrics selected. Pick some under Columns.'); return; }
-  if(!data.length){ el.innerHTML=emptyState(); return; }
-  const add=compiledAdd(), byWeek=state.gran==='week';
+  const scopeEl=document.getElementById('ovScope'), byWeek=state.gran==='week';
+  document.getElementById('ovGran').textContent=byWeek?'week':'day';
+  if(!cols.length){ el.innerHTML=emptyState('No metrics selected. Pick some under Columns.'); scopeEl.innerHTML=''; return; }
+  if(!data.length){ el.innerHTML=emptyState(); scopeEl.innerHTML=''; return; }
+  const add=compiledAdd();
   const pmap=new Map(), chTot=new Map(), grand=newAgg();
   for(const r of data){
     const id=byWeek?r.weekNum:r.dk; if(id==null) continue;
-    let p=pmap.get(id); if(!p){ p={id,total:newAgg(),ch:new Map()}; pmap.set(id,p); }
+    let p=pmap.get(id); if(!p){ p={id,year:byWeek?r.year:new Date(r.dk).getFullYear(),total:newAgg(),ch:new Map()}; pmap.set(id,p); }
     add(p.total,r); add(grand,r);
     let c=p.ch.get(r.channel); if(!c){ c=newAgg(); p.ch.set(r.channel,c); } add(c,r);
     let t=chTot.get(r.channel); if(!t){ t=newAgg(); chTot.set(r.channel,t); } add(t,r);
   }
-  const periods=[...pmap.values()].sort((a,b)=>a.id-b.id);
+  const periods=[...pmap.values()].sort((a,b)=>a.id-b.id), n=periods.length;
   const chans=[...chTot.entries()].sort((a,b)=>b[1].Spend-a[1].Spend).map(e=>e[0]);
-  const EMPTY=newAgg(), n=periods.length;
-  document.getElementById('ovSub').textContent=`${n} ${byWeek?'week':'day'}${n===1?'':'s'} side by side · metrics in rows`;
-  const sections=[{name:chans.length>1?'All channels':null,chip:chans.length===1?chans[0]:null,get:p=>p.total,tot:grand}];
-  if(chans.length>1) chans.forEach(ch=>sections.push({chip:ch,get:p=>p.ch.get(ch)||EMPTY,tot:chTot.get(ch)}));
-  const parts=[`<table class="ov"><thead><tr><th>Metric</th>${periods.map(periodHead).join('')}<th class="tot-col">Total</th></tr></thead><tbody>`];
-  sections.forEach(sec=>{
-    parts.push(`<tr class="sec-row"><td>${sec.chip?chipHtml(sec.chip):esc(sec.name)}</td><td colspan="${n+1}"></td></tr>`);
-    cols.forEach(c=>{
-      parts.push(`<tr><td class="metric">${esc(c.l)}</td>${periods.map(p=>cellHtml(sec.get(p),c)).join('')}${cellHtml(sec.tot,c,'tot-col')}</tr>`);
+  const unit=byWeek?'week':'day', E=newAgg();
+  const canSplit=n>=2 && n<=MAX_SPLIT, split=state.ovSplit && canSplit;
+  const sortNote=cols.some(c=>c.k==='Spend')?'sorted by spend, highest first':'sorted by spend, highest first (Spend column hidden)';
+  document.getElementById('ovSub').textContent = split
+    ? `${n} ${unit}s side by side · channels ${sortNote}`
+    : `${n} ${unit}${n===1?'':'s'} · rows ${sortNote}`;
+  scopeEl.innerHTML=`<label class="toggle" title="${canSplit?'':'Select 2 to '+MAX_SPLIT+' '+unit+'s to compare them side by side'}"><input type="checkbox" id="ovSplitToggle" ${state.ovSplit?'checked':''} ${canSplit?'':'disabled'}> ${byWeek?'Weeks':'Days'} side by side${canSplit?'':` <span class="muted">(select 2–${MAX_SPLIT})</span>`}</label>`;
+
+  const parts=[];
+  if(split){
+    // Rows = channels; each metric column splits into one column per period plus % change
+    const last=periods[n-1], prev=periods[n-2];
+    const cells=(get,par)=>cols.map(c=>{
+      if(c.share) return periods.map((p,i)=>shareCell(shareVal(get(p),par(p)),i===0?'gs':'')).join('')+chgCell(shareVal(get(last),par(last)),shareVal(get(prev),par(prev)),c);
+      return periods.map((p,i)=>cellHtml(get(p),c,i===0?'gs':'')).join('')+chgCell(colValue(get(last),c),colValue(get(prev),c),c);
+    }).join('');
+    parts.push(`<table class="camp"><thead><tr class="r1"><th rowspan="2">Channel</th>${cols.map(c=>`<th class="grp${c.k==='Spend'?' sorted':''}" colspan="${n+1}"${c.share?' title="Each channel\u2019s % of total spend"':''}>${esc(c.l)}${c.k==='Spend'?' ↓':''}</th>`).join('')}</tr>`);
+    parts.push(`<tr class="r2">${cols.map(()=>periods.map((p,i)=>`<th class="${i===0?'gs':''}" title="${esc(periodTitle(p.id))}">${esc(periodName(p.id))} <span class="ph-d">${esc(periodSub(p.id))}</span></th>`).join('')
+      +`<th class="chg-h">% chg<div class="ph-d" style="text-transform:none">${esc(periodName(last.id))} vs ${esc(periodName(prev.id))}</div></th>`).join('')}</tr>`);
+    const totLabel = chans.length===1 ? chipHtml(chans[0]) : `Total <span class="muted">· all channels</span>`;
+    parts.push(`<tr class="tot-row"><td>${totLabel}</td>${cells(p=>p.total,p=>p.total)}</tr></thead><tbody>`);
+    if(chans.length>1) chans.forEach(ch=>parts.push(`<tr><td>${chipHtml(ch)}</td>${cells(p=>p.ch.get(ch)||E,p=>p.total)}</tr>`));
+    parts.push('</tbody></table>');
+  } else {
+    // Rows = period x channel (with a subtotal per period), metrics in columns
+    const byCost=[...periods].sort((a,b)=>b.total.Spend-a.total.Spend);
+    const label=p=> byWeek ? `<span class="yr">${esc(p.year)}</span>${esc(WEEK_SHORT[p.id])}` : esc(dayLabel(p.id));
+    parts.push(`<table><thead><tr><th>${byWeek?'Week':'Day'}</th><th class="l">Channel</th>${cols.map(c=>`<th class="${c.k==='Spend'?'sorted':(c.share?'share-h':'')}"${c.share?' title="Channel rows: % of that week\u2019s spend. Week totals: % of the grand total."':''}>${esc(c.l)}${c.k==='Spend'?' ↓':''}</th>`).join('')}</tr>`);
+    parts.push(`<tr class="tot-row"><td>Grand total <span class="muted">· ${n} ${unit}${n===1?'':'s'}</span></td><td></td>${rowCells(grand,grand,cols)}</tr></thead><tbody>`);
+    byCost.forEach(p=>{
+      const pch=[...p.ch.entries()].sort((a,b)=>b[1].Spend-a[1].Spend).map(e=>e[0]);
+      pch.forEach((ch,idx)=>parts.push(`<tr><td class="period">${idx===0?label(p):''}</td><td class="l">${chipHtml(ch)}</td>${rowCells(p.ch.get(ch),p.total,cols)}</tr>`));
+      if(pch.length>1) parts.push(`<tr class="subtotal"><td></td><td class="l">Total</td>${rowCells(p.total,grand,cols)}</tr>`);
     });
-  });
-  parts.push('</tbody></table>');
+    parts.push('</tbody></table>');
+  }
   el.innerHTML=parts.join('');
+  stickHead(el.querySelector('table'));
+  document.getElementById('ovSplitToggle').onchange=e=>{ state.ovSplit=e.target.checked; renderOverview(); };
 }
 
 /* ---- Campaign view (weeks side by side when 2-8 are selected) ---- */
 const MAX_SPLIT=8;
 let _camps=[], _cv={};
+// Spend share column for Campaign view, placed right after Spend.
+// Ad group rows: % of their campaign's spend. Campaign rows: % of total spend.
+const SHARE_COL={k:'SpendShare',l:'Spend share',fmt:'pct',share:true};
+function shareVal(a,p){ return p&&p.Spend ? (a.Spend||0)/p.Spend : null; }
 function renderCampaign(){
   const cols=activeColumns(), rows=filteredData(), el=document.getElementById('campaignTable');
   const noteEl=document.getElementById('campNote'), scopeEl=document.getElementById('campScope');
@@ -1037,27 +1111,31 @@ function renderCampaign(){
   const shown=showAllCamps?camps:camps.slice(0,CAMP_LIMIT);
   const totalSpend=grand.agg.Spend||0;
 
-  document.getElementById('campSub').textContent=`${camps.length.toLocaleString('en-IN')} campaign${camps.length===1?'':'s'} · sorted by spend, highest first`+(split?` · ${weeks.length} weeks side by side`:'');
+  document.getElementById('campSub').textContent=`${camps.length.toLocaleString('en-IN')} campaign${camps.length===1?'':'s'} · campaigns and ad groups sorted by spend, highest first${cols.some(c=>c.k==='Spend')?'':' (Spend column hidden)'}`+(split?` · ${weeks.length} weeks side by side`:'');
   scopeEl.innerHTML=`<label class="toggle" title="${canSplit?'':'Select 2 to '+MAX_SPLIT+' weeks to compare them side by side'}"><input type="checkbox" id="splitToggle" ${state.splitWeeks?'checked':''} ${canSplit?'':'disabled'}> Weeks side by side${canSplit?'':` <span class="muted">(select 2–${MAX_SPLIT} weeks)</span>`}</label>
     <button class="btn-ghost" id="expandAll">Expand all</button><button class="btn-ghost" id="collapseAll">Collapse all</button>`;
 
   let head;
   if(split){
-    head=`<thead><tr class="r1"><th rowspan="2">Campaign / Ad group</th><th rowspan="2" class="l">Channel</th>${cols.map(c=>`<th class="grp${c.k==='Spend'?' sorted':''}" colspan="${weeks.length}">${esc(c.l)}${c.k==='Spend'?' ↓':''}</th>`).join('')}</tr>
-      <tr class="r2">${cols.map(()=>weeks.map((w,i)=>`<th class="${i===0?'gs':''}" title="${esc(WEEK_LABELS[w])}">${esc(WEEK_NAME[w].replace(/^Week\s*/i,'W'))} <span class="ph-d">${esc(WEEK_YEAR[w])}</span></th>`).join('')).join('')}</tr></thead>`;
+    const wS=w=>esc(WEEK_NAME[w].replace(/^Week\s*/i,'W'));
+    const last=weeks[weeks.length-1], prev=weeks[weeks.length-2];
+    head=`<thead><tr class="r1"><th rowspan="2">Campaign / Ad group</th><th rowspan="2" class="l">Channel</th>${cols.map(c=>`<th class="grp${c.k==='Spend'?' sorted':''}" colspan="${weeks.length+1}"${c.share?` title="Ad group rows: % of their campaign's spend. Campaign rows: % of total spend."`:''}>${esc(c.l)}${c.share?' <span class="ph-d" style="text-transform:none">(ad group of campaign)</span>':''}${c.k==='Spend'?' ↓':''}</th>`).join('')}</tr>
+      <tr class="r2">${cols.map(()=>weeks.map((w,i)=>`<th class="${i===0?'gs':''}" title="${esc(WEEK_LABELS[w])}">${wS(w)} <span class="ph-d">${esc(WEEK_YEAR[w])}</span></th>`).join('')+`<th class="chg-h" title="${esc(WEEK_LABELS[last])} vs ${esc(WEEK_LABELS[prev])}">% chg<div class="ph-d" style="text-transform:none">${wS(last)} vs ${wS(prev)}</div></th>`).join('')}</tr></thead>`;
   } else {
-    head=`<thead><tr><th>Campaign / Ad group</th><th class="l">Channel</th>${cols.map(c=>`<th class="${c.k==='Spend'?'sorted':''}">${esc(c.l)}${c.k==='Spend'?' ↓':''}</th>`).join('')}</tr></thead>`;
+    head=`<thead><tr><th>Campaign / Ad group</th><th class="l">Channel</th>${cols.map(c=>c.share?`<th class="share-h" title="Ad group rows: % of their campaign's spend. Campaign rows: % of total spend.">${esc(c.l)}<div class="ph-d" style="text-transform:none">ad group of campaign</div></th>`:`<th class="${c.k==='Spend'?'sorted':''}">${esc(c.l)}${c.k==='Spend'?' ↓':''}</th>`).join('')}</tr></thead>`;
   }
-  const parts=['<table>',head,'<tbody>'];
+  const totalRow=`<tr class="tot-row"><td>Total <span class="muted">· ${camps.length.toLocaleString('en-IN')} campaign${camps.length===1?'':'s'}</span></td><td></td>${metricCells(grand,grand)}</tr>`;
+  const parts=['<table class="camp">',head.replace('</thead>',totalRow+'</thead>'),'<tbody>'];
   shown.forEach((c,i)=>{
     const isOpen=expanded.has(c.ck), share=totalSpend?(c.agg.Spend/totalSpend*100):0;
-    parts.push(`<tr class="camp-row" data-i="${i}" title="${share.toFixed(1)}% of total spend"><td><div class="cname-wrap"><span class="caret${isOpen?' open':''}">▸</span><span class="rank">${i+1}</span><span class="cname">${esc(c.camp)}</span><span class="agc">${c.ags.length} ad group${c.ags.length===1?'':'s'}</span></div><div class="share"><span style="width:${share.toFixed(2)}%"></span></div></td><td class="l">${chipHtml(c.ch)}</td>${metricCells(c)}</tr>`);
+    parts.push(`<tr class="camp-row" data-i="${i}" title="${share.toFixed(1)}% of total spend"><td><div class="cname-wrap"><span class="caret${isOpen?' open':''}">▸</span><span class="rank">${i+1}</span><span class="cname">${esc(c.camp)}</span><span class="agc">${c.ags.length} ad group${c.ags.length===1?'':'s'}</span></div><div class="share"><span style="width:${share.toFixed(2)}%"></span></div></td><td class="l">${chipHtml(c.ch)}</td>${metricCells(c,grand)}</tr>`);
     if(isOpen) parts.push(agRowsHtml(c,i));
   });
-  const ncol=2+cols.length*(split?weeks.length:1);
+  const ncol=2+cols.length*(split?weeks.length+1:1);
   if(camps.length>shown.length) parts.push(`<tr class="more-row"><td colspan="${ncol}"><button class="btn-ghost" id="showAllCamps">Show all ${camps.length.toLocaleString('en-IN')} campaigns (top ${CAMP_LIMIT} shown)</button></td></tr>`);
-  parts.push(`</tbody><tfoot><tr><td>Total <span class="muted">· ${camps.length.toLocaleString('en-IN')} campaign${camps.length===1?'':'s'}</span></td><td></td>${metricCells(grand)}</tr></tfoot></table>`);
+  parts.push('</tbody></table>');
   el.innerHTML=parts.join('');
+  stickHead(el.querySelector('table'));
 
   el.onclick=e=>{
     const row=e.target.closest('.camp-row'); if(!row) return;
@@ -1070,14 +1148,45 @@ function renderCampaign(){
   document.getElementById('collapseAll').onclick=()=>{ expanded.clear(); renderCampaign(); };
   const more=document.getElementById('showAllCamps'); if(more) more.onclick=ev=>{ ev.stopPropagation(); showAllCamps=true; renderCampaign(); };
 }
-function metricCells(o){
+function rowCells(agg,parent,cols){ return cols.map(c=>c.share?shareCell(shareVal(agg,parent)):cellHtml(agg,c)).join(''); }
+function shareCell(v,cls){ return `<td class="share-c ${cls||''}">${fmt(v,'pct')}</td>`; }
+function metricCells(o,parent){
   const {cols,weeks,split}=_cv;
-  if(!split) return cellsHtml(o.agg,cols);
+  if(!split) return cols.map(c=>c.share?shareCell(shareVal(o.agg,parent.agg)):cellHtml(o.agg,c)).join('');
   const E=newAgg();
-  return cols.map(c=>weeks.map((w,i)=>cellHtml(o.wk.get(w)||E,c,i===0?'gs':'')).join('')).join('');
+  const last=weeks[weeks.length-1], prev=weeks[weeks.length-2];
+  const wk=(x,w)=>x.wk.get(w)||E;
+  return cols.map(c=>{
+    if(c.share) return weeks.map((w,i)=>shareCell(shareVal(wk(o,w),wk(parent,w)),i===0?'gs':'')).join('')
+      + chgCell(shareVal(wk(o,last),wk(parent,last)), shareVal(wk(o,prev),wk(parent,prev)), c);
+    return weeks.map((w,i)=>cellHtml(wk(o,w),c,i===0?'gs':'')).join('')
+      + chgCell(colValue(wk(o,last),c), colValue(wk(o,prev),c), c);
+  }).join('');
+}
+// Cost metrics going up is bad (red); everything else going up is good (green).
+const LOWER_IS_BETTER=new Set(['CPI','CPL','CPOB','CPFOD','CPC','CPM']);
+function chgCell(cur,prev,c){
+  const isRate=c.fmt==='pct'||c.fmt==='pct2'||c.fmt==='spct';
+  if(cur==null||prev==null||isNaN(cur)||isNaN(prev)) return '<td class="chg">—</td>';
+  let d, txt;
+  if(isRate){ d=(cur-prev)*100; txt=(d>0?'+':'')+d.toFixed(1)+' pp'; }        // percentage points for rates
+  else { if(!prev) return '<td class="chg">—</td>'; d=(cur-prev)/Math.abs(prev)*100; txt=(d>0?'+':'')+d.toFixed(1)+'%'; }
+  if(Math.abs(d)<0.05) return `<td class="chg">${isRate?'0.0 pp':'0.0%'}</td>`;
+  const good = LOWER_IS_BETTER.has(c.k) ? d<0 : d>0;
+  return `<td class="chg ${c.share?'':(good?'up':'down')}">${d>0?'▲':'▼'} ${txt.replace(/^[+-]/,'')}</td>`;
+}
+// Freeze every header row (including the total row) by stacking their offsets.
+function stickHead(table){
+  if(!table) return;
+  let top=0;
+  table.querySelectorAll('thead tr').forEach(tr=>{
+    tr.querySelectorAll('th,td').forEach(c=>{ if(c.rowSpan>1 && top>0) return; if(!c.dataset.top){ c.style.top=top+'px'; } });
+    tr.querySelectorAll('th[rowspan],td[rowspan]').forEach(c=>{ if(c.rowSpan>1) c.dataset.top='1'; });
+    top+=tr.getBoundingClientRect().height;
+  });
 }
 function agRowsHtml(c,i){
-  return c.ags.map(a=>`<tr class="ag-row" data-parent="${i}"><td>${esc(a.ag)}</td><td></td>${metricCells(a)}</tr>`).join('');
+  return c.ags.map(a=>`<tr class="ag-row" data-parent="${i}"><td>${esc(a.ag)}</td><td></td>${metricCells(a,c)}</tr>`).join('');
 }
 
 /* =================== Initial empty state =================== */
